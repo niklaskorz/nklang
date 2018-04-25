@@ -2,3 +2,4 @@ a := "Hello World";
 x = 5;
 y := 3;
 a := x;
+z := 9;

@@ -17,10 +17,11 @@ func main() {
 	}
 
 	s := lexer.NewScanner(f)
-	ast, err := parser.Parse(s)
+	p, err := parser.Parse(s)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(ast)
+	fmt.Println(p)
+	fmt.Println(p.Evaluate())
 }

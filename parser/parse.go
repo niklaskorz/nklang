@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"strconv"
 
+	"niklaskorz.de/nklang/ast"
 	"niklaskorz.de/nklang/lexer"
 )
 
-func Parse(s *lexer.Scanner) (BlockNode, error) {
+func Parse(s *lexer.Scanner) (*ast.Program, error) {
 	if err := s.ReadNext(); err != nil {
 		return nil, err
 	}
 
-	statements := []*Node{}
+	statements := []ast.Node{}
 	for s.Token.Type != lexer.EOF {
 		n, err := parseStatement(s)
 		if err != nil {
@@ -22,11 +23,11 @@ func Parse(s *lexer.Scanner) (BlockNode, error) {
 		statements = append(statements, n)
 	}
 
-	n := BlockNode{statements: statements}
-	return n, nil
+	p := ast.Program{Statements: statements}
+	return &p, nil
 }
 
-func parseStatement(s *lexer.Scanner) (Node, error) {
+func parseStatement(s *lexer.Scanner) (ast.Node, error) {
 	n, err := parseExpression(s)
 	if err != nil {
 		return nil, err
@@ -40,7 +41,7 @@ func parseStatement(s *lexer.Scanner) (Node, error) {
 	return n, nil
 }
 
-func parseExpression(s *lexer.Scanner) (Node, error) {
+func parseExpression(s *lexer.Scanner) (ast.Node, error) {
 	switch s.Token.Type {
 	case lexer.LeftParen:
 		if err := s.ReadNext(); err != nil {
@@ -67,7 +68,7 @@ func parseExpression(s *lexer.Scanner) (Node, error) {
 			if err := s.ReadNext(); err != nil {
 				return nil, err
 			}
-			n := DeclarationNode{Identifier: identifier}
+			n := ast.Declaration{Identifier: identifier}
 			v, err := parseExpression(s)
 			if err != nil {
 				return nil, err
@@ -78,7 +79,7 @@ func parseExpression(s *lexer.Scanner) (Node, error) {
 			if err := s.ReadNext(); err != nil {
 				return nil, err
 			}
-			n := AssignmentNode{Identifier: identifier}
+			n := ast.Assignment{Identifier: identifier}
 			v, err := parseExpression(s)
 			if err != nil {
 				return nil, err
@@ -86,7 +87,7 @@ func parseExpression(s *lexer.Scanner) (Node, error) {
 			n.Value = v
 			return n, nil
 		default:
-			n := LookupNode{Identifier: identifier}
+			n := ast.Lookup{Identifier: identifier}
 			return n, nil
 		}
 	case lexer.Integer:
@@ -94,13 +95,13 @@ func parseExpression(s *lexer.Scanner) (Node, error) {
 		if err != nil {
 			return nil, err
 		}
-		n := IntegerNode{Value: num}
+		n := ast.Integer{Value: num}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
 		return n, nil
 	case lexer.String:
-		n := StringNode{Value: s.Token.Value}
+		n := ast.String{Value: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
