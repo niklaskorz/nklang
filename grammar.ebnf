@@ -1,0 +1,33 @@
+ID = [a-zA-Z][a-zA-Z0-9]* ;
+NUM = [0-9]+ ;
+STR = " alle_uncicode_zeichen ";
+
+
+stmts = { stmt } ;
+
+stmt = if_stmt
+     | while_stmt
+     | [ expr ] ";"
+     ;
+
+if_stmt = if_expr ;
+
+while_stmt = "while" expr "{" stmts "}" ;
+
+expr = "(" expr ")"
+     | term { ("+" | "-") term }
+     | if_expr
+     ;
+
+term = factor { ("*" | "/") factor } ;
+
+factor = ID ":=" expr
+       | ID "=" expr
+       | ID
+       | value
+       ;
+
+value = STR | NUM ;
+
+if_expr = "if" expr "{" stmts "}" [ else_branch ] ;
+else_branch = "else" (if_expr | "{" stmts "}") ;
