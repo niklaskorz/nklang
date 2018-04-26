@@ -2,6 +2,7 @@ stmts = { stmt } ;
 
 stmt = if_stmt
      | while_stmt
+     | "return" [ expr ] ";"
      | [ expr ] ";"
      ;
 
@@ -27,11 +28,14 @@ term = addend { ("+" | "-") addend } ;
 
 addend = factor { ("*" | "/") factor } ;
 
-factor = ID [ declaration | assignment | call ]
+factor = "(" expr ")" [ call ]
+       | function
+       | ID [ declaration | assignment | call ]
        | NUM
        | STR
-       | "(" expr ")" [ call ]
        ;
+
+function = "(" ID { "," ID } ")" "=>" "{" stmts "}" ;
 
 declaration = ":=" expr ;
 
