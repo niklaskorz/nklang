@@ -6,13 +6,16 @@ stmt = if_stmt
      ;
 
 if_stmt = "if" expr "{" stmts "}" [ if_stmt_else ] ;
-if_expr_else = "else" (if_stmt | "{" stmts "}") ;
+if_stmt_else = "else" (if_stmt | "{" stmts "}") ;
 
 while_stmt = "while" expr "{" stmts "}" ;
 
 expr = if_expr
      | l_or
      ;
+
+if_expr = "if" expr "{" expr "}" [ if_expr_else ] ;
+if_expr_else = "else" (if_expr | "{" expr "}") ;
 
 l_or = l_and { "||" l_and };
 
@@ -29,11 +32,14 @@ term = addend { ("+" | "-") addend };
 
 addend = factor { ("*" | "/") factor } ;
 
-factor = ID [ (":=" | "=") expr | "(" [ expr { "," expr } ] ")" ]
+factor = ID [ declaration | assignment | call ]
        | NUM
        | STR
        | "(" expr ")"
        ;
 
-if_expr = "if" expr "{" expr "}" [ if_expr_else ] ;
-if_expr_else = "else" (if_expr | "{" expr "}") ;
+declaration = ":=" expr ;
+
+assignment = "=" expr ;
+
+call = "(" [ expr { "," expr } ] ")" ;
