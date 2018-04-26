@@ -21,9 +21,7 @@ expr = "(" expr ")"
 
 term = factor { ("*" | "/") factor } ;
 
-factor = ID ":=" expr
-       | ID "=" expr
-       | ID
+factor = ID [ (":=" | "=") expr ]
        | value
        ;
 
