@@ -21,12 +21,7 @@ l_or = l_and { "||" l_and };
 
 l_and = comp { "&&" comp };
 
-comp = term "==" term
-     | term ">" term
-     | term ">=" term
-     | term "<" term
-     | term "<=" term
-     ;
+comp = term [ ( "==" | ">" | ">=" | "<" | "<=" ) term ] ;
 
 term = addend { ("+" | "-") addend };
 
