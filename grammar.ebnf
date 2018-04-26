@@ -38,6 +38,8 @@ factor = "(" expr ")" [ call ]
        | ID [ call ]
        | NUM
        | STR
+       | "true"
+       | "false"
        ;
 
 call = "(" [ expr { "," expr } ] ")" ;

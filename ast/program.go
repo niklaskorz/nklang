@@ -1,25 +1,11 @@
 package ast
 
 type Program struct {
-	Statements []Node
+	Statements []Statement
 }
 
-func (p Program) String() string {
-	str := ""
+func (p Program) Execute() {
 	for _, s := range p.Statements {
-		str += s.String() + ";\n"
+		s.Evaluate()
 	}
-	return str
-}
-
-func (p Program) Evaluate() Node {
-	var ret Node = Void{}
-	for _, s := range p.Statements {
-		ret = s.Evaluate()
-	}
-	return ret
-}
-
-func (p Program) IsTrue() bool {
-	return true
 }

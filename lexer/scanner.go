@@ -10,15 +10,35 @@ import (
 const bufferSize = 32
 
 type Scanner struct {
-	rd    *bufio.Reader
-	Token *Token
+	rd            *bufio.Reader
+	Token         *Token
+	previousToken *Token
+	nextToken     *Token
 }
 
 func NewScanner(rd io.Reader) *Scanner {
 	return &Scanner{rd: bufio.NewReader(rd)}
 }
 
+func (s *Scanner) Unread() error {
+	if s.previousToken == nil {
+		return fmt.Errorf("Can't unread more than one token")
+	}
+	s.nextToken = s.Token
+	s.Token = s.previousToken
+	s.previousToken = nil
+	return nil
+}
+
 func (s *Scanner) ReadNext() error {
+	s.previousToken = s.Token
+
+	if s.nextToken != nil {
+		s.Token = s.nextToken
+		s.nextToken = nil
+		return nil
+	}
+
 	err := s.readNext()
 	if err == io.EOF {
 		s.Token = &Token{Type: EOF, Value: "EOF"}

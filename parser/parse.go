@@ -28,10 +28,80 @@ func Parse(s *lexer.Scanner) (*ast.Program, error) {
 }
 
 func parseStatement(s *lexer.Scanner) (ast.Node, error) {
-	n, err := parseExpression(s)
-	if err != nil {
-		return nil, err
+	if s.Token.Type == lexer.IfKeyword {
+		n, err := parseIfStatement(s)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	}
+
+	if s.Token.Type == lexer.WhileKeyword {
+		n, err := parseWhileStatement(s)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	}
+
+	var n ast.Node
+	var err error
+
+	if s.Token.Type == lexer.ContinueKeyword {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+	} else if s.Token.Type == lexer.BreakKeyword {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+	} else if s.Token.Type == lexer.ReturnKeyword {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		n, err := parseExpression(s)
+		if err != nil {
+			return nil, err
+		}
+	} else if s.Token.Type == lexer.ID {
+		identifier := s.Token.Value
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		if s.Token.Type == lexer.DeclarationOperator {
+			if err := s.ReadNext(); err != nil {
+				return nil, err
+			}
+			v, err := parseExpression(s)
+			if err != nil {
+				return nil, err
+			}
+			n = ast.Declaration{Identifier: identifier, Value: v}
+		} else if s.Token.Type == lexer.AssignmentOperator {
+			if err := s.ReadNext(); err != nil {
+				return nil, err
+			}
+			v, err := parseExpression(s)
+			if err != nil {
+				return nil, err
+			}
+			n = ast.Assignment{Identifier: identifier, Value: v}
+		} else {
+			if err := s.Unread(); err != nil {
+				return nil, err
+			}
+			n, err = parseExpression(s)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		n, err = parseExpression(s)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if s.Token.Type != lexer.Semicolon {
 		return nil, fmt.Errorf("Unexpected token %s", s.Token.Value)
 	}
@@ -58,7 +128,7 @@ func parseExpression(s *lexer.Scanner) (ast.Node, error) {
 			return nil, err
 		}
 		return n, nil
-	case lexer.Identifier:
+	case lexer.ID:
 		identifier := s.Token.Value
 		if err := s.ReadNext(); err != nil {
 			return nil, err
