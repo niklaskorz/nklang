@@ -16,7 +16,7 @@ expr = "(" expr ")"
 
 term = factor { ("*" | "/") factor } ;
 
-factor = ID [ (":=" | "=") expr ]
+factor = ID [ (":=" | "=") expr | "(" [ expr { "," expr } ] ")" ]
        | value
        ;
 
