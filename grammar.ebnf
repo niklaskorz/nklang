@@ -17,10 +17,9 @@ expr = "(" expr ")"
 term = factor { ("*" | "/") factor } ;
 
 factor = ID [ (":=" | "=") expr | "(" [ expr { "," expr } ] ")" ]
-       | value
+       | NUM
+       | STR
        ;
-
-value = STR | NUM ;
 
 if_expr = "if" expr "{" stmts "}" [ else_branch ] ;
 else_branch = "else" (if_expr | "{" stmts "}") ;
