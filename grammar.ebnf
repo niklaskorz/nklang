@@ -4,7 +4,9 @@ stmt = if_stmt
      | while_stmt
      | "continue" ";"
      | "break" ";"
-     | [ "return" ] [ expr ] ";"
+     | ID ( ":=" | "=" ) expr ";"
+     | "return" [ expr ] ";"
+     | [ expr ] ";"
      ;
 
 if_stmt = "if" expr "{" stmts "}" [ if_stmt_else ] ;
@@ -33,13 +35,9 @@ term = addend { ("+" | "-") addend } ;
 addend = factor { ("*" | "/") factor } ;
 
 factor = "(" expr ")" [ call ]
-       | ID [ declaration | assignment | call ]
+       | ID [ call ]
        | NUM
        | STR
        ;
-
-declaration = ":=" expr ;
-
-assignment = "=" expr ;
 
 call = "(" [ expr { "," expr } ] ")" ;
