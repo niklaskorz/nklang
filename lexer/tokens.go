@@ -3,25 +3,32 @@ package lexer
 type TokenType int
 
 const (
-	DeclarationOperator TokenType = iota
-	AssignmentOperator
-	MultiplicationOperator
-	DivisionOperator
-	AdditionOperator
-	SubstractionOperator
-	Semicolon
-	Whitespace
-	LeftParen
-	RightParen
-	LeftBrace
-	RightBrace
-	LeftBracket
-	RightBracket
-	Identifier
-	Integer
+	EOF                 TokenType = iota
+	ReturnKeyword                 // return
+	ContinueKeyword               // continue
+	BreakKeyword                  // break
+	FunctionKeyword               // func
+	IfKeyword                     // if
+	ElseKeyword                   // else
+	WhileKeyword                  // while
+	DeclarationOperator           // :=
+	AssignmentOperator            // =
+	MulOperator                   // *
+	DivOperator                   // /
+	AddOperator                   // +
+	SubOperator                   // -
+	Semicolon                     // ;
+	Comma                         // ,
+	LeftParen                     // (
+	RightParen                    // )
+	LeftBrace                     // {
+	RightBrace                    // }
+	LeftBracket                   // [
+	RightBracket                  // ]
+	ID                            // Unicode letter followed by unicde letters or digits
+	Integer                       // Digits
 	Float
-	String
-	EOF
+	String // Arbitrary characters enclosed by quotation marks
 )
 
 type Token struct {

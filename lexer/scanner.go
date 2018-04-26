@@ -61,7 +61,25 @@ func (s *Scanner) readNext() error {
 			return err
 		}
 		id := string(r) + v
-		s.Token = &Token{Type: Identifier, Value: id}
+		s.Token = &Token{Type: ID, Value: id}
+
+		switch id {
+		case "return":
+			s.Token.Type = ReturnKeyword
+		case "continue":
+			s.Token.Type = ContinueKeyword
+		case "break":
+			s.Token.Type = BreakKeyword
+		case "func":
+			s.Token.Type = FunctionKeyword
+		case "if":
+			s.Token.Type = IfKeyword
+		case "else":
+			s.Token.Type = ElseKeyword
+		case "while":
+			s.Token.Type = WhileKeyword
+		}
+
 		return nil
 	}
 
@@ -93,8 +111,33 @@ func (s *Scanner) readNext() error {
 		return nil
 	}
 
+	if r == '*' {
+		s.Token = &Token{Type: MulOperator, Value: "*"}
+		return nil
+	}
+
+	if r == '/' {
+		s.Token = &Token{Type: DivOperator, Value: "/"}
+		return nil
+	}
+
+	if r == '+' {
+		s.Token = &Token{Type: AddOperator, Value: "+"}
+		return nil
+	}
+
+	if r == '-' {
+		s.Token = &Token{Type: SubOperator, Value: "-"}
+		return nil
+	}
+
 	if r == ';' {
 		s.Token = &Token{Type: Semicolon, Value: ";"}
+		return nil
+	}
+
+	if r == ',' {
+		s.Token = &Token{Type: Comma, Value: ","}
 		return nil
 	}
 
@@ -108,23 +151,23 @@ func (s *Scanner) readNext() error {
 		return nil
 	}
 
-	if r == '*' {
-		s.Token = &Token{Type: MultiplicationOperator, Value: "*"}
+	if r == '{' {
+		s.Token = &Token{Type: LeftBrace, Value: "{"}
 		return nil
 	}
 
-	if r == '/' {
-		s.Token = &Token{Type: DivisionOperator, Value: "/"}
+	if r == '}' {
+		s.Token = &Token{Type: RightBrace, Value: "}"}
 		return nil
 	}
 
-	if r == '+' {
-		s.Token = &Token{Type: AdditionOperator, Value: "+"}
+	if r == '[' {
+		s.Token = &Token{Type: LeftBracket, Value: "["}
 		return nil
 	}
 
-	if r == '-' {
-		s.Token = &Token{Type: SubstractionOperator, Value: "-"}
+	if r == ']' {
+		s.Token = &Token{Type: RightBracket, Value: "]"}
 		return nil
 	}
 
