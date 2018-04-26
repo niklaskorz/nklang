@@ -1,8 +1,3 @@
-ID = [a-zA-Z][a-zA-Z0-9]* ;
-NUM = [0-9]+ ;
-STR = \" . \";
-
-
 stmts = { stmt } ;
 
 stmt = if_stmt
