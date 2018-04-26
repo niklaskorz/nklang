@@ -17,13 +17,13 @@ expr = if_expr
 if_expr = "if" expr "{" expr "}" [ if_expr_else ] ;
 if_expr_else = "else" (if_expr | "{" expr "}") ;
 
-l_or = l_and { "||" l_and };
+l_or = l_and { "||" l_and } ;
 
-l_and = comp { "&&" comp };
+l_and = comp { "&&" comp } ;
 
-comp = term [ ( "==" | ">" | ">=" | "<" | "<=" ) term ] ;
+comp = term [ ("==" | ">" | ">=" | "<" | "<=") term ] ;
 
-term = addend { ("+" | "-") addend };
+term = addend { ("+" | "-") addend } ;
 
 addend = factor { ("*" | "/") factor } ;
 
