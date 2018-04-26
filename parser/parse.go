@@ -27,7 +27,7 @@ func Parse(s *lexer.Scanner) (*ast.Program, error) {
 	return &p, nil
 }
 
-func parseStatement(s *lexer.Scanner) (ast.Node, error) {
+func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 	if s.Token.Type == lexer.IfKeyword {
 		n, err := parseIfStatement(s)
 		if err != nil {
@@ -44,7 +44,7 @@ func parseStatement(s *lexer.Scanner) (ast.Node, error) {
 		return n, nil
 	}
 
-	var n ast.Node
+	var n ast.Expression
 	var err error
 
 	if s.Token.Type == lexer.ContinueKeyword {
@@ -111,7 +111,7 @@ func parseStatement(s *lexer.Scanner) (ast.Node, error) {
 	return n, nil
 }
 
-func parseExpression(s *lexer.Scanner) (ast.Node, error) {
+func parseExpression(s *lexer.Scanner) (ast.Expression, error) {
 	switch s.Token.Type {
 	case lexer.LeftParen:
 		if err := s.ReadNext(); err != nil {
