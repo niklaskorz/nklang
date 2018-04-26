@@ -2,8 +2,9 @@ stmts = { stmt } ;
 
 stmt = if_stmt
      | while_stmt
-     | "return" [ expr ] ";"
-     | [ expr ] ";"
+     | "continue" ";"
+     | "break" ";"
+     | [ "return" ] [ expr ] ";"
      ;
 
 if_stmt = "if" expr "{" stmts "}" [ if_stmt_else ] ;
