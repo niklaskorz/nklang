@@ -12,11 +12,14 @@ if_stmt_else = "else" (if_stmt | "{" stmts "}") ;
 while_stmt = "while" expr "{" stmts "}" ;
 
 expr = if_expr
+     | function
      | l_or
      ;
 
 if_expr = "if" expr "{" expr "}" [ if_expr_else ] ;
 if_expr_else = "else" (if_expr | "{" expr "}") ;
+
+function = "(" ID { "," ID } ")" "=>" "{" stmts "}" ;
 
 l_or = l_and { "||" l_and } ;
 
@@ -29,13 +32,10 @@ term = addend { ("+" | "-") addend } ;
 addend = factor { ("*" | "/") factor } ;
 
 factor = "(" expr ")" [ call ]
-       | function
        | ID [ declaration | assignment | call ]
        | NUM
        | STR
        ;
-
-function = "(" ID { "," ID } ")" "=>" "{" stmts "}" ;
 
 declaration = ":=" expr ;
 
