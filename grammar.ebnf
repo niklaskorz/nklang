@@ -20,7 +20,7 @@ expr = if_expr
 if_expr = "if" expr "{" expr "}" [ if_expr_else ] ;
 if_expr_else = "else" (if_expr | "{" expr "}") ;
 
-function = "(" ID { "," ID } ")" "=>" "{" stmts "}" ;
+function = "func" "(" ID { "," ID } ")" "{" stmts "}" ;
 
 l_or = l_and { "||" l_and } ;
 
