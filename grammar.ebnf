@@ -5,21 +5,35 @@ stmt = if_stmt
      | [ expr ] ";"
      ;
 
-if_stmt = if_expr ;
+if_stmt = "if" expr "{" stmts "}" [ if_stmt_else ] ;
+if_expr_else = "else" (if_stmt | "{" stmts "}") ;
 
 while_stmt = "while" expr "{" stmts "}" ;
 
-expr = "(" expr ")"
-     | term { ("+" | "-") term }
-     | if_expr
+expr = if_expr
+     | l_or
      ;
 
-term = factor { ("*" | "/") factor } ;
+l_or = l_and { "||" l_and };
+
+l_and = comp { "&&" comp };
+
+comp = term "==" term
+     | term ">" term
+     | term ">=" term
+     | term "<" term
+     | term "<=" term
+     ;
+
+term = addend { ("+" | "-") addend };
+
+addend = factor { ("*" | "/") factor } ;
 
 factor = ID [ (":=" | "=") expr | "(" [ expr { "," expr } ] ")" ]
        | NUM
        | STR
+       | "(" expr ")"
        ;
 
-if_expr = "if" expr "{" stmts "}" [ else_branch ] ;
-else_branch = "else" (if_expr | "{" stmts "}") ;
+if_expr = "if" expr "{" expr "}" [ if_expr_else ] ;
+if_expr_else = "else" (if_expr | "{" expr "}") ;
