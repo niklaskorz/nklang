@@ -30,7 +30,7 @@ addend = factor { ("*" | "/") factor } ;
 factor = ID [ declaration | assignment | call ]
        | NUM
        | STR
-       | "(" expr ")"
+       | "(" expr ")" [ call ]
        ;
 
 declaration = ":=" expr ;
