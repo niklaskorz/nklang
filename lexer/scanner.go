@@ -98,6 +98,10 @@ func (s *Scanner) readNext() error {
 			s.Token.Type = ElseKeyword
 		case "while":
 			s.Token.Type = WhileKeyword
+		case "true":
+			s.Token.Type = TrueKeyword
+		case "false":
+			s.Token.Type = FalseKeyword
 		}
 
 		return nil
@@ -127,7 +131,77 @@ func (s *Scanner) readNext() error {
 	}
 
 	if r == '=' {
-		s.Token = &Token{Type: AssignmentOperator, Value: "="}
+		r, _, err := s.rd.ReadRune()
+		if err != nil {
+			return err
+		}
+
+		if r == '=' {
+			s.Token = &Token{Type: EqOperator, Value: "=="}
+		} else {
+			if err := s.rd.UnreadRune(); err != nil {
+				return err
+			}
+			s.Token = &Token{Type: AssignmentOperator, Value: "="}
+		}
+		return nil
+	}
+
+	if r == '<' {
+		r, _, err := s.rd.ReadRune()
+		if err != nil {
+			return err
+		}
+
+		if r == '=' {
+			s.Token = &Token{Type: LeOperator, Value: "<="}
+		} else {
+			if err := s.rd.UnreadRune(); err != nil {
+				return err
+			}
+			s.Token = &Token{Type: LtOperator, Value: "<"}
+		}
+		return nil
+	}
+
+	if r == '>' {
+		r, _, err := s.rd.ReadRune()
+		if err != nil {
+			return err
+		}
+
+		if r == '=' {
+			s.Token = &Token{Type: GeOperator, Value: ">="}
+		} else {
+			if err := s.rd.UnreadRune(); err != nil {
+				return err
+			}
+			s.Token = &Token{Type: GtOperator, Value: ">"}
+		}
+		return nil
+	}
+
+	if r == '&' {
+		r, _, err = s.rd.ReadRune()
+		if err != nil {
+			return err
+		}
+		if r != '&' {
+			return fmt.Errorf("Unexpected symbol %c", r)
+		}
+		s.Token = &Token{Type: LogicalAnd, Value: "&&"}
+		return nil
+	}
+
+	if r == '|' {
+		r, _, err = s.rd.ReadRune()
+		if err != nil {
+			return err
+		}
+		if r != '|' {
+			return fmt.Errorf("Unexpected symbol %c", r)
+		}
+		s.Token = &Token{Type: LogicalOr, Value: "||"}
 		return nil
 	}
 
