@@ -45,7 +45,6 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 	}
 
 	var n ast.Statement
-	var err error
 
 	if s.Token.Type == lexer.ContinueKeyword {
 		if err := s.ReadNext(); err != nil {
@@ -79,7 +78,7 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 			if err != nil {
 				return nil, err
 			}
-			n = ast.Declaration{Identifier: identifier, Value: v}
+			n = ast.DeclarationStatement{Identifier: identifier, Value: v}
 		} else if s.Token.Type == lexer.AssignmentOperator {
 			if err := s.ReadNext(); err != nil {
 				return nil, err
@@ -88,7 +87,7 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 			if err != nil {
 				return nil, err
 			}
-			n = ast.Assignment{Identifier: identifier, Value: v}
+			n = ast.AssignmentStatement{Identifier: identifier, Value: v}
 		} else {
 			if err := s.Unread(); err != nil {
 				return nil, err
@@ -221,49 +220,23 @@ func parseExpression(s *lexer.Scanner) (ast.Expression, error) {
 		}
 		return n, nil
 	case lexer.ID:
-		identifier := s.Token.Value
+		n := ast.LookupExpression{Identifier: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
-		switch s.Token.Type {
-		case lexer.DeclarationOperator:
-			if err := s.ReadNext(); err != nil {
-				return nil, err
-			}
-			n := ast.Declaration{Identifier: identifier}
-			v, err := parseExpression(s)
-			if err != nil {
-				return nil, err
-			}
-			n.Value = v
-			return n, nil
-		case lexer.AssignmentOperator:
-			if err := s.ReadNext(); err != nil {
-				return nil, err
-			}
-			n := ast.Assignment{Identifier: identifier}
-			v, err := parseExpression(s)
-			if err != nil {
-				return nil, err
-			}
-			n.Value = v
-			return n, nil
-		default:
-			n := ast.Lookup{Identifier: identifier}
-			return n, nil
-		}
+		return n, nil
 	case lexer.Integer:
 		num, err := strconv.ParseInt(s.Token.Value, 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		n := ast.Integer{Value: num}
+		n := ast.IntegerExpression{Value: num}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
 		return n, nil
 	case lexer.String:
-		n := ast.String{Value: s.Token.Value}
+		n := ast.StringExpression{Value: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -271,4 +244,76 @@ func parseExpression(s *lexer.Scanner) (ast.Expression, error) {
 	}
 
 	return nil, fmt.Errorf("Unexpected token %s", s.Token)
+}
+
+func parseIfExpression(s *lexer.Scanner) (*ast.IfExpression, error) {
+	if s.Token.Type != lexer.IfKeyword {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	cond, err := parseExpression(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.Token.Type != lexer.LeftBrace {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	v, err := parseExpression(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.Token.Type != lexer.RightBrace {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	n := &ast.IfExpression{Condition: cond, Value: v}
+
+	if s.Token.Type != lexer.ElseKeyword {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	if s.Token.Type == lexer.IfKeyword {
+		elseBranch, err := parseIfExpression(s)
+		if err != nil {
+			return nil, err
+		}
+		n.ElseBranch = elseBranch
+	} else if s.Token.Type == lexer.LeftBrace {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		v, err := parseExpression(s)
+		if err != nil {
+			return nil, err
+		}
+
+		if s.Token.Type != lexer.RightBrace {
+			return nil, fmt.Errorf("Unexpected token %s", s.Token)
+		}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		n.ElseBranch = &ast.IfExpression{Value: v}
+	} else {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+
+	return n, nil
 }

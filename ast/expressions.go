@@ -5,39 +5,68 @@ type Expression interface {
 	IsTrue() bool
 }
 
-type Lookup struct {
+type IfExpression struct {
+	Condition  Expression
+	Value      Expression
+	ElseBranch *IfExpression
+}
+
+func (n IfExpression) Evaluate() Expression {
+	if n.Condition != nil {
+		if n.Condition.IsTrue() {
+			return n.Value.Evaluate()
+		}
+		// Else branch must be set if condition is set
+		return n.ElseBranch.Evaluate()
+	}
+	return n.Value.Evaluate()
+}
+
+type LookupExpression struct {
 	Identifier string
 }
 
-func (n Lookup) Evaluate() Expression {
+func (n LookupExpression) Evaluate() Expression {
 	// TODO: Implement lookup
-	return Integer{Value: 0}
+	return IntegerExpression{Value: 0}
 }
 
-func (n Lookup) IsTrue() bool {
+func (n LookupExpression) IsTrue() bool {
 	return n.Evaluate().IsTrue()
 }
 
-type Integer struct {
+type IntegerExpression struct {
 	Value int64
 }
 
-func (n Integer) Evaluate() Expression {
+func (n IntegerExpression) Evaluate() Expression {
 	return n
 }
 
-func (n Integer) IsTrue() bool {
+func (n IntegerExpression) IsTrue() bool {
 	return n.Value != 0
 }
 
-type String struct {
+type StringExpression struct {
 	Value string
 }
 
-func (n String) Evaluate() Expression {
+func (n StringExpression) Evaluate() Expression {
 	return n
 }
 
-func (n String) IsTrue() bool {
+func (n StringExpression) IsTrue() bool {
 	return n.Value != ""
+}
+
+type BooleanExpression struct {
+	Value bool
+}
+
+func (n BooleanExpression) Evaluate() Expression {
+	return n
+}
+
+func (n BooleanExpression) IsTrue() bool {
+	return n.Value
 }

@@ -49,22 +49,22 @@ func (n ExpressionStatement) Evaluate() {
 	n.Expression.Evaluate()
 }
 
-type Declaration struct {
+type DeclarationStatement struct {
 	Identifier string
 	Value      Expression
 }
 
-func (n Declaration) Evaluate() {
+func (n DeclarationStatement) Evaluate() {
 	// TODO: Implement declaration
 	n.Value.Evaluate()
 }
 
-type Assignment struct {
+type AssignmentStatement struct {
 	Identifier string
 	Value      Expression
 }
 
-func (n Assignment) Evaluate() {
+func (n AssignmentStatement) Evaluate() {
 	// TODO: Implement assignment
 	n.Value.Evaluate()
 }
