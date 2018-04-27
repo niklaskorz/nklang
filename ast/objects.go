@@ -1,7 +1,7 @@
 package ast
 
 type Object interface {
-	Evaluate() Object
+	Evaluate() (Object, error)
 	IsTrue() bool
 }
 type Function struct {
@@ -9,8 +9,8 @@ type Function struct {
 	Statements []Statement
 }
 
-func (n Function) Evaluate() Object {
-	return n
+func (n Function) Evaluate() (Object, error) {
+	return n, nil
 }
 
 func (n Function) IsTrue() bool {
@@ -21,8 +21,8 @@ type Integer struct {
 	Value int64
 }
 
-func (n Integer) Evaluate() Object {
-	return n
+func (n Integer) Evaluate() (Object, error) {
+	return n, nil
 }
 
 func (n Integer) IsTrue() bool {
@@ -33,8 +33,8 @@ type String struct {
 	Value string
 }
 
-func (n String) Evaluate() Object {
-	return n
+func (n String) Evaluate() (Object, error) {
+	return n, nil
 }
 
 func (n String) IsTrue() bool {
@@ -45,8 +45,8 @@ type Boolean struct {
 	Value bool
 }
 
-func (n Boolean) Evaluate() Object {
-	return n
+func (n Boolean) Evaluate() (Object, error) {
+	return n, nil
 }
 
 func (n Boolean) IsTrue() bool {

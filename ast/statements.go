@@ -1,7 +1,7 @@
 package ast
 
 type Statement interface {
-	Evaluate()
+	Evaluate() error
 }
 
 type IfStatement struct {
@@ -10,22 +10,30 @@ type IfStatement struct {
 	ElseBranch *IfStatement
 }
 
-func (n IfStatement) evaluateStatements() {
+func (n IfStatement) evaluateStatements() error {
 	for _, s := range n.Statements {
-		s.Evaluate()
+		if err := s.Evaluate(); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func (n IfStatement) Evaluate() {
+func (n IfStatement) Evaluate() error {
 	if n.Condition != nil {
-		if n.Condition.Evaluate().IsTrue() {
-			n.evaluateStatements()
-		} else if n.ElseBranch != nil {
-			n.ElseBranch.Evaluate()
+		c, err := n.Condition.Evaluate()
+		if err != nil {
+			return err
 		}
-	} else {
-		n.evaluateStatements()
+		if c.IsTrue() {
+			return n.evaluateStatements()
+		}
+		if n.ElseBranch != nil {
+			return n.ElseBranch.Evaluate()
+		}
+		return nil
 	}
+	return n.evaluateStatements()
 }
 
 type WhileStatement struct {
@@ -33,10 +41,20 @@ type WhileStatement struct {
 	Statements []Statement
 }
 
-func (n WhileStatement) Evaluate() {
-	for n.Condition.Evaluate().IsTrue() {
+func (n WhileStatement) Evaluate() error {
+	for {
+		c, err := n.Condition.Evaluate()
+		if err != nil {
+			return err
+		}
+		if !c.IsTrue() {
+			return nil
+		}
+
 		for _, s := range n.Statements {
-			s.Evaluate()
+			if err := s.Evaluate(); err != nil {
+				return err
+			}
 		}
 	}
 }
@@ -45,8 +63,9 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
-func (n ExpressionStatement) Evaluate() {
-	n.Expression.Evaluate()
+func (n ExpressionStatement) Evaluate() error {
+	_, err := n.Expression.Evaluate()
+	return err
 }
 
 type DeclarationStatement struct {
@@ -54,9 +73,10 @@ type DeclarationStatement struct {
 	Value      Expression
 }
 
-func (n DeclarationStatement) Evaluate() {
+func (n DeclarationStatement) Evaluate() error {
 	// TODO: Implement declaration
 	n.Value.Evaluate()
+	return nil
 }
 
 type AssignmentStatement struct {
@@ -64,28 +84,32 @@ type AssignmentStatement struct {
 	Value      Expression
 }
 
-func (n AssignmentStatement) Evaluate() {
+func (n AssignmentStatement) Evaluate() error {
 	// TODO: Implement assignment
 	n.Value.Evaluate()
+	return nil
 }
 
 type ReturnStatement struct {
 	Expression Expression
 }
 
-func (n ReturnStatement) Evaluate() {
+func (n ReturnStatement) Evaluate() error {
 	// TODO: Implement
 	n.Expression.Evaluate()
+	return nil
 }
 
 type ContinueStatement struct{}
 
-func (n ContinueStatement) Evaluate() {
+func (n ContinueStatement) Evaluate() error {
 	// TODO: Implement
+	return nil
 }
 
 type BreakStatement struct{}
 
-func (n BreakStatement) Evaluate() {
+func (n BreakStatement) Evaluate() error {
 	// TODO: Implement
+	return nil
 }

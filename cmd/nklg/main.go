@@ -22,6 +22,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(p)
-	p.Execute()
+	fmt.Printf("%+v\n", p)
+	if err := p.Execute(); err != nil {
+		fmt.Println(err)
+	}
 }
