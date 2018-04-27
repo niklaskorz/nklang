@@ -49,42 +49,12 @@ func (s *Scanner) ReadNext() error {
 }
 
 func (s *Scanner) readRune() (rune, error) {
-	var r rune
-	var err error
-
-	for {
-		// Skip whitespace
-		r, _, err = s.rd.ReadRune()
-		if err != nil {
-			return 0, err
-		}
-
-		s.column++
-
-		if !unicode.IsSpace(r) {
-			break
-		}
-
-		if r == '\n' || r == '\r' {
-			s.line++
-			s.column = 0
-		}
-
-		if r == '\r' {
-			// Skip LF after CR
-			r, _, err = s.rd.ReadRune()
-			if err != nil {
-				return 0, err
-			}
-			if r != '\n' {
-				// No LF, rewind
-				if err := s.rd.UnreadRune(); err != nil {
-					return 0, err
-				}
-			}
-		}
+	r, _, err := s.rd.ReadRune()
+	if err != nil {
+		return 0, err
 	}
 
+	s.column++
 	return r, nil
 }
 
@@ -97,9 +67,38 @@ func (s *Scanner) unreadRune() error {
 }
 
 func (s *Scanner) readNext() error {
-	r, err := s.readRune()
-	if err != nil {
-		return err
+	var r rune
+	var err error
+
+	for {
+		// Skip whitespace
+		r, err = s.readRune()
+		if err != nil {
+			return err
+		}
+
+		if !unicode.IsSpace(r) {
+			break
+		}
+
+		if r == '\n' || r == '\r' {
+			s.line++
+			s.column = 0
+		}
+
+		if r == '\r' {
+			// Skip LF after CR
+			r, err = s.readRune()
+			if err != nil {
+				return err
+			}
+			if r != '\n' {
+				// No LF, rewind
+				if err := s.unreadRune(); err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	line, column := s.line, s.column
