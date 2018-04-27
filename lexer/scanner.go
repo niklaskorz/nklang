@@ -11,13 +11,14 @@ const bufferSize = 32
 
 type Scanner struct {
 	rd            *bufio.Reader
+	line, column  int
 	Token         *Token
 	previousToken *Token
 	nextToken     *Token
 }
 
 func NewScanner(rd io.Reader) *Scanner {
-	return &Scanner{rd: bufio.NewReader(rd)}
+	return &Scanner{rd: bufio.NewReader(rd), line: 1, column: 0}
 }
 
 func (s *Scanner) Unread() error {
@@ -47,26 +48,63 @@ func (s *Scanner) ReadNext() error {
 	return err
 }
 
-func (s *Scanner) readNext() error {
+func (s *Scanner) readRune() (rune, error) {
 	var r rune
 	var err error
 
 	for {
 		// Skip whitespace
-
 		r, _, err = s.rd.ReadRune()
 		if err != nil {
-			return err
+			return 0, err
 		}
+
+		s.column++
 
 		if !unicode.IsSpace(r) {
 			break
 		}
+
+		if r == '\n' || r == '\r' {
+			s.line++
+			s.column = 0
+		}
+
+		if r == '\r' {
+			// Skip LF after CR
+			r, _, err = s.rd.ReadRune()
+			if err != nil {
+				return 0, err
+			}
+			if r != '\n' {
+				// No LF, rewind
+				if err := s.rd.UnreadRune(); err != nil {
+					return 0, err
+				}
+			}
+		}
+	}
+
+	return r, nil
+}
+
+func (s *Scanner) unreadRune() error {
+	if s.column == 0 {
+		return fmt.Errorf("Cannot unread rune after line break")
+	}
+	s.column--
+	return s.rd.UnreadRune()
+}
+
+func (s *Scanner) readNext() error {
+	r, err := s.readRune()
+	if err != nil {
+		return err
 	}
 
 	if r == '"' {
 		// String
-		v, err := scanString(s.rd)
+		v, err := s.scanString()
 		if err != nil {
 			return err
 		}
@@ -76,7 +114,7 @@ func (s *Scanner) readNext() error {
 
 	if unicode.IsLetter(r) || r == '_' {
 		// Identifier
-		v, err := scanIdentifier(s.rd)
+		v, err := s.scanIdentifier()
 		if err != nil {
 			return err
 		}
@@ -109,7 +147,7 @@ func (s *Scanner) readNext() error {
 
 	if unicode.IsDigit(r) {
 		// Number
-		v, err := scanIdentifier(s.rd)
+		v, err := s.scanIdentifier()
 		if err != nil {
 			return err
 		}
@@ -119,19 +157,19 @@ func (s *Scanner) readNext() error {
 	}
 
 	if r == ':' {
-		r, _, err = s.rd.ReadRune()
+		r, err = s.readRune()
 		if err != nil {
 			return err
 		}
 		if r != '=' {
-			return fmt.Errorf("Unexpected symbol %c", r)
+			return s.unexpectedSymbol(r)
 		}
 		s.Token = &Token{Type: DeclarationOperator, Value: ":="}
 		return nil
 	}
 
 	if r == '=' {
-		r, _, err := s.rd.ReadRune()
+		r, err := s.readRune()
 		if err != nil {
 			return err
 		}
@@ -139,7 +177,7 @@ func (s *Scanner) readNext() error {
 		if r == '=' {
 			s.Token = &Token{Type: EqOperator, Value: "=="}
 		} else {
-			if err := s.rd.UnreadRune(); err != nil {
+			if err := s.unreadRune(); err != nil {
 				return err
 			}
 			s.Token = &Token{Type: AssignmentOperator, Value: "="}
@@ -148,7 +186,7 @@ func (s *Scanner) readNext() error {
 	}
 
 	if r == '<' {
-		r, _, err := s.rd.ReadRune()
+		r, err := s.readRune()
 		if err != nil {
 			return err
 		}
@@ -156,7 +194,7 @@ func (s *Scanner) readNext() error {
 		if r == '=' {
 			s.Token = &Token{Type: LeOperator, Value: "<="}
 		} else {
-			if err := s.rd.UnreadRune(); err != nil {
+			if err := s.unreadRune(); err != nil {
 				return err
 			}
 			s.Token = &Token{Type: LtOperator, Value: "<"}
@@ -165,7 +203,7 @@ func (s *Scanner) readNext() error {
 	}
 
 	if r == '>' {
-		r, _, err := s.rd.ReadRune()
+		r, err := s.readRune()
 		if err != nil {
 			return err
 		}
@@ -173,7 +211,7 @@ func (s *Scanner) readNext() error {
 		if r == '=' {
 			s.Token = &Token{Type: GeOperator, Value: ">="}
 		} else {
-			if err := s.rd.UnreadRune(); err != nil {
+			if err := s.unreadRune(); err != nil {
 				return err
 			}
 			s.Token = &Token{Type: GtOperator, Value: ">"}
@@ -182,24 +220,24 @@ func (s *Scanner) readNext() error {
 	}
 
 	if r == '&' {
-		r, _, err = s.rd.ReadRune()
+		r, err = s.readRune()
 		if err != nil {
 			return err
 		}
 		if r != '&' {
-			return fmt.Errorf("Unexpected symbol %c", r)
+			return s.unexpectedSymbol(r)
 		}
 		s.Token = &Token{Type: LogicalAnd, Value: "&&"}
 		return nil
 	}
 
 	if r == '|' {
-		r, _, err = s.rd.ReadRune()
+		r, err = s.readRune()
 		if err != nil {
 			return err
 		}
 		if r != '|' {
-			return fmt.Errorf("Unexpected symbol %c", r)
+			return s.unexpectedSymbol(r)
 		}
 		s.Token = &Token{Type: LogicalOr, Value: "||"}
 		return nil
@@ -265,59 +303,65 @@ func (s *Scanner) readNext() error {
 		return nil
 	}
 
-	return fmt.Errorf("Unexpected symbol %c", r)
+	return s.unexpectedSymbol(r)
 }
 
-func scanString(rd *bufio.Reader) (string, error) {
-	s := ""
+func (s *Scanner) scanString() (string, error) {
+	str := ""
 	for {
-		r, _, err := rd.ReadRune()
+		r, _, err := s.rd.ReadRune()
 		if err != nil {
 			return "", err
 		}
+		s.column++
 
-		if r == '"' {
-			return s, nil
+		if r == '\n' {
+			s.line++
+			s.column = 0
 		}
 
-		s += string(r)
+		if r == '"' {
+			return str, nil
+		}
+
+		str += string(r)
 	}
 }
 
-func scanIdentifier(rd *bufio.Reader) (string, error) {
-	s := ""
+func (s *Scanner) scanIdentifier() (string, error) {
+	str := ""
 	for {
-		r, _, err := rd.ReadRune()
+		r, err := s.readRune()
 		if err != nil {
 			return "", err
 		}
 
 		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '_' {
-			if err := rd.UnreadRune(); err != nil {
+			if err := s.unreadRune(); err != nil {
 				return "", err
 			}
-			return s, nil
+			return str, nil
 		}
 
-		s += string(r)
+		str += string(r)
 	}
 }
 
-func scanInteger(rd *bufio.Reader) (string, error) {
-	s := ""
+func (s *Scanner) scanInteger() (string, error) {
+	str := ""
 	for {
-		r, _, err := rd.ReadRune()
+		r, err := s.readRune()
 		if err != nil {
 			return "", err
 		}
 
 		if !unicode.IsDigit(r) {
-			if err := rd.UnreadRune(); err != nil {
+			if err := s.unreadRune(); err != nil {
 				return "", err
 			}
-			return s, nil
+			return str, nil
 		}
 
-		s += string(r)
+		str += string(r)
 	}
 }
