@@ -20,20 +20,21 @@ func (n IfStatement) evaluateStatements() error {
 }
 
 func (n IfStatement) Evaluate() error {
-	if n.Condition != nil {
-		c, err := n.Condition.Evaluate()
-		if err != nil {
-			return err
-		}
-		if c.IsTrue() {
-			return n.evaluateStatements()
-		}
-		if n.ElseBranch != nil {
-			return n.ElseBranch.Evaluate()
-		}
-		return nil
+	if n.Condition == nil {
+		return n.evaluateStatements()
 	}
-	return n.evaluateStatements()
+
+	c, err := n.Condition.Evaluate()
+	if err != nil {
+		return err
+	}
+	if c.IsTrue() {
+		return n.evaluateStatements()
+	}
+	if n.ElseBranch != nil {
+		return n.ElseBranch.Evaluate()
+	}
+	return nil
 }
 
 type WhileStatement struct {

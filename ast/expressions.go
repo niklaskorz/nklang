@@ -11,18 +11,19 @@ type IfExpression struct {
 }
 
 func (n IfExpression) Evaluate() (Object, error) {
-	if n.Condition != nil {
-		c, err := n.Condition.Evaluate()
-		if err != nil {
-			return nil, err
-		}
-		if c.IsTrue() {
-			return n.Value.Evaluate()
-		}
-		// Else branch must be set if condition is set
-		return n.ElseBranch.Evaluate()
+	if n.Condition == nil {
+		return n.Value.Evaluate()
 	}
-	return n.Value.Evaluate()
+
+	c, err := n.Condition.Evaluate()
+	if err != nil {
+		return nil, err
+	}
+	if c.IsTrue() {
+		return n.Value.Evaluate()
+	}
+	// Else branch must be set if condition is set
+	return n.ElseBranch.Evaluate()
 }
 
 type LogicalOrExpression struct {
