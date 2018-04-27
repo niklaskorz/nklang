@@ -23,5 +23,5 @@ func main() {
 		return
 	}
 	fmt.Println(p)
-	fmt.Println(p.Evaluate())
+	p.Execute()
 }
