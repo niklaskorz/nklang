@@ -44,7 +44,7 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 		return n, nil
 	}
 
-	var n ast.Expression
+	var n ast.Statement
 	var err error
 
 	if s.Token.Type == lexer.ContinueKeyword {

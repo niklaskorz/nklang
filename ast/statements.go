@@ -4,14 +4,22 @@ type Statement interface {
 	Evaluate()
 }
 
+type ExpressionStatement struct {
+	Expression Expression
+}
+
+func (n ExpressionStatement) Evaluate() {
+	n.Expression.Evaluate()
+}
+
 type Declaration struct {
 	Identifier string
 	Value      Expression
 }
 
-func (d Declaration) Evaluate() {
+func (n Declaration) Evaluate() {
 	// TODO: Implement declaration
-	d.Value.Evaluate()
+	n.Value.Evaluate()
 }
 
 type Assignment struct {
@@ -19,9 +27,9 @@ type Assignment struct {
 	Value      Expression
 }
 
-func (a Assignment) Evaluate() {
+func (n Assignment) Evaluate() {
 	// TODO: Implement assignment
-	a.Value.Evaluate()
+	n.Value.Evaluate()
 }
 
 type ReturnStatement struct {
