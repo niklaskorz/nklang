@@ -204,46 +204,13 @@ func parseStatementBlock(s *lexer.Scanner) ([]ast.Statement, error) {
 
 func parseExpression(s *lexer.Scanner) (ast.Expression, error) {
 	switch s.Token.Type {
-	case lexer.LeftParen:
-		if err := s.ReadNext(); err != nil {
-			return nil, err
-		}
-		n, err := parseExpression(s)
-		if err != nil {
-			return nil, err
-		}
-		if s.Token.Type != lexer.RightParen {
-			return nil, fmt.Errorf("Unexpected token %s", s.Token)
-		}
-		if err := s.ReadNext(); err != nil {
-			return nil, err
-		}
-		return n, nil
-	case lexer.ID:
-		n := ast.LookupExpression{Identifier: s.Token.Value}
-		if err := s.ReadNext(); err != nil {
-			return nil, err
-		}
-		return n, nil
-	case lexer.Integer:
-		num, err := strconv.ParseInt(s.Token.Value, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		n := ast.IntegerExpression{Value: num}
-		if err := s.ReadNext(); err != nil {
-			return nil, err
-		}
-		return n, nil
-	case lexer.String:
-		n := ast.StringExpression{Value: s.Token.Value}
-		if err := s.ReadNext(); err != nil {
-			return nil, err
-		}
-		return n, nil
+	case lexer.IfKeyword:
+		return parseIfExpression(s)
+	case lexer.FunctionKeyword:
+		return parseFunction(s)
+	default:
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
 	}
-
-	return nil, fmt.Errorf("Unexpected token %s", s.Token)
 }
 
 func parseIfExpression(s *lexer.Scanner) (*ast.IfExpression, error) {
@@ -316,4 +283,98 @@ func parseIfExpression(s *lexer.Scanner) (*ast.IfExpression, error) {
 	}
 
 	return n, nil
+}
+
+func parseFunction(s *lexer.Scanner) (*ast.Function, error) {
+	if s.Token.Type != lexer.FunctionKeyword {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	if s.Token.Type != lexer.LeftParen {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	parameters := []string{}
+
+	for s.Token.Type == lexer.ID {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		parameters = append(parameters, s.Token.Value)
+
+		if s.Token.Type != lexer.Comma {
+			break
+		}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+	}
+
+	if s.Token.Type != lexer.RightParen {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	statements, err := parseStatementBlock(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.Function{Parameters: parameters, Statements: statements}, nil
+}
+
+func parseLogicalOr(s *lexer.Scanner) (ast.Expression, error) {
+
+}
+
+func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
+	switch s.Token.Type {
+	case lexer.LeftParen:
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		n, err := parseExpression(s)
+		if err != nil {
+			return nil, err
+		}
+		if s.Token.Type != lexer.RightParen {
+			return nil, fmt.Errorf("Unexpected token %s", s.Token)
+		}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
+	case lexer.ID:
+		n := ast.LookupExpression{Identifier: s.Token.Value}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
+	case lexer.Integer:
+		num, err := strconv.ParseInt(s.Token.Value, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		n := ast.Integer{Value: num}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
+	case lexer.String:
+		n := ast.String{Value: s.Token.Value}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
+	}
+
+	return nil, fmt.Errorf("Unexpected token %s", s.Token)
 }

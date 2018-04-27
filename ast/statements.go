@@ -18,7 +18,7 @@ func (n IfStatement) evaluateStatements() {
 
 func (n IfStatement) Evaluate() {
 	if n.Condition != nil {
-		if n.Condition.IsTrue() {
+		if n.Condition.Evaluate().IsTrue() {
 			n.evaluateStatements()
 		} else if n.ElseBranch != nil {
 			n.ElseBranch.Evaluate()
@@ -34,7 +34,7 @@ type WhileStatement struct {
 }
 
 func (n WhileStatement) Evaluate() {
-	for n.Condition.IsTrue() {
+	for n.Condition.Evaluate().IsTrue() {
 		for _, s := range n.Statements {
 			s.Evaluate()
 		}

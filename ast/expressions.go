@@ -1,8 +1,7 @@
 package ast
 
 type Expression interface {
-	Evaluate() Expression
-	IsTrue() bool
+	Evaluate() Object
 }
 
 type IfExpression struct {
@@ -11,9 +10,9 @@ type IfExpression struct {
 	ElseBranch *IfExpression
 }
 
-func (n IfExpression) Evaluate() Expression {
+func (n IfExpression) Evaluate() Object {
 	if n.Condition != nil {
-		if n.Condition.IsTrue() {
+		if n.Condition.Evaluate().IsTrue() {
 			return n.Value.Evaluate()
 		}
 		// Else branch must be set if condition is set
@@ -22,51 +21,37 @@ func (n IfExpression) Evaluate() Expression {
 	return n.Value.Evaluate()
 }
 
+type LogicalOrExpression struct {
+	A Expression
+	B Expression
+}
+
+func (n LogicalOrExpression) Evaluate() Object {
+	a := n.A.Evaluate()
+	if a.IsTrue() {
+		return a
+	}
+	return n.B.Evaluate()
+}
+
+type LogicalAndExpression struct {
+	A Expression
+	B Expression
+}
+
+func (n LogicalAndExpression) Evaluate() Object {
+	a := n.A.Evaluate()
+	if a.IsTrue() {
+		return n.B.Evaluate()
+	}
+	return a
+}
+
 type LookupExpression struct {
 	Identifier string
 }
 
-func (n LookupExpression) Evaluate() Expression {
+func (n LookupExpression) Evaluate() Object {
 	// TODO: Implement lookup
-	return IntegerExpression{Value: 0}
-}
-
-func (n LookupExpression) IsTrue() bool {
-	return n.Evaluate().IsTrue()
-}
-
-type IntegerExpression struct {
-	Value int64
-}
-
-func (n IntegerExpression) Evaluate() Expression {
-	return n
-}
-
-func (n IntegerExpression) IsTrue() bool {
-	return n.Value != 0
-}
-
-type StringExpression struct {
-	Value string
-}
-
-func (n StringExpression) Evaluate() Expression {
-	return n
-}
-
-func (n StringExpression) IsTrue() bool {
-	return n.Value != ""
-}
-
-type BooleanExpression struct {
-	Value bool
-}
-
-func (n BooleanExpression) Evaluate() Expression {
-	return n
-}
-
-func (n BooleanExpression) IsTrue() bool {
-	return n.Value
+	return Integer{Value: 0}
 }
