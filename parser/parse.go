@@ -13,7 +13,7 @@ func Parse(s *lexer.Scanner) (*ast.Program, error) {
 		return nil, err
 	}
 
-	statements := []ast.Node{}
+	statements := []ast.Statement{}
 	for s.Token.Type != lexer.EOF {
 		n, err := parseStatement(s)
 		if err != nil {
@@ -51,18 +51,21 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
+		n = ast.ContinueStatement{}
 	} else if s.Token.Type == lexer.BreakKeyword {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
+		n = ast.BreakStatement{}
 	} else if s.Token.Type == lexer.ReturnKeyword {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
-		n, err := parseExpression(s)
+		e, err := parseExpression(s)
 		if err != nil {
 			return nil, err
 		}
+		n = ast.ReturnStatement{Expression: e}
 	} else if s.Token.Type == lexer.ID {
 		identifier := s.Token.Value
 		if err := s.ReadNext(); err != nil {
@@ -90,25 +93,114 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 			if err := s.Unread(); err != nil {
 				return nil, err
 			}
-			n, err = parseExpression(s)
+			e, err := parseExpression(s)
 			if err != nil {
 				return nil, err
 			}
+			n = ast.ExpressionStatement{Expression: e}
 		}
 	} else {
-		n, err = parseExpression(s)
+		e, err := parseExpression(s)
 		if err != nil {
 			return nil, err
 		}
+		n = ast.ExpressionStatement{Expression: e}
 	}
 
 	if s.Token.Type != lexer.Semicolon {
-		return nil, fmt.Errorf("Unexpected token %s", s.Token.Value)
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
 	}
 	if err := s.ReadNext(); err != nil {
 		return nil, err
 	}
 	return n, nil
+}
+
+func parseIfStatement(s *lexer.Scanner) (*ast.IfStatement, error) {
+	if s.Token.Type != lexer.IfKeyword {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	e, err := parseExpression(s)
+	if err != nil {
+		return nil, err
+	}
+
+	statements, err := parseStatementBlock(s)
+	if err != nil {
+		return nil, err
+	}
+
+	n := &ast.IfStatement{Condition: e, Statements: statements}
+
+	if s.Token.Type == lexer.ElseKeyword {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		if s.Token.Type == lexer.IfKeyword {
+			elseBranch, err := parseIfStatement(s)
+			if err != nil {
+				return nil, err
+			}
+			n.ElseBranch = elseBranch
+		} else if s.Token.Type == lexer.LeftBrace {
+			statements, err := parseStatementBlock(s)
+			if err != nil {
+				return nil, err
+			}
+			n.ElseBranch = &ast.IfStatement{Statements: statements}
+		}
+	}
+
+	return n, nil
+}
+
+func parseWhileStatement(s *lexer.Scanner) (*ast.WhileStatement, error) {
+	if s.Token.Type != lexer.WhileKeyword {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	e, err := parseExpression(s)
+	if err != nil {
+		return nil, err
+	}
+
+	statements, err := parseStatementBlock(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.WhileStatement{Condition: e, Statements: statements}, nil
+}
+
+func parseStatementBlock(s *lexer.Scanner) ([]ast.Statement, error) {
+	if s.Token.Type != lexer.LeftBrace {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	statements := []ast.Statement{}
+	for s.Token.Type != lexer.RightBrace {
+		n, err := parseStatement(s)
+		if err != nil {
+			return nil, err
+		}
+		statements = append(statements, n)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	return statements, nil
 }
 
 func parseExpression(s *lexer.Scanner) (ast.Expression, error) {
@@ -122,7 +214,7 @@ func parseExpression(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 		if s.Token.Type != lexer.RightParen {
-			return nil, fmt.Errorf("Unexpected token %s", s.Token.Value)
+			return nil, fmt.Errorf("Unexpected token %s", s.Token)
 		}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
@@ -178,5 +270,5 @@ func parseExpression(s *lexer.Scanner) (ast.Expression, error) {
 		return n, nil
 	}
 
-	return nil, fmt.Errorf("Unexpected token %s", s.Token.Value)
+	return nil, fmt.Errorf("Unexpected token %s", s.Token)
 }

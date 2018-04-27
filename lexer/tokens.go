@@ -35,3 +35,13 @@ type Token struct {
 	Type  TokenType
 	Value string
 }
+
+func (t Token) String() string {
+	if t.Type == String {
+		return "\"" + t.Value + "\""
+	}
+	if t.Type == EOF {
+		return "EOF"
+	}
+	return t.Value
+}
