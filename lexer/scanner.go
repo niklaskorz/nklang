@@ -42,7 +42,7 @@ func (s *Scanner) ReadNext() error {
 
 	err := s.readNext()
 	if err == io.EOF {
-		s.Token = &Token{Type: EOF, Value: "EOF"}
+		s.Token = &Token{Line: s.line, Column: s.column, Type: EOF, Value: "EOF"}
 		return nil
 	}
 	return err
