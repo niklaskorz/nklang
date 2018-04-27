@@ -11,12 +11,21 @@ const (
 	IfKeyword                     // if
 	ElseKeyword                   // else
 	WhileKeyword                  // while
+	TrueKeyword                   // true
+	FalseKeyword                  // false
 	DeclarationOperator           // :=
 	AssignmentOperator            // =
 	MulOperator                   // *
 	DivOperator                   // /
 	AddOperator                   // +
 	SubOperator                   // -
+	LogicalOr                     // ||
+	LogicalAnd                    // &&
+	EqOperator                    // ==
+	LtOperator                    // <
+	LeOperator                    // <=
+	GtOperator                    // >
+	GeOperator                    // >=
 	Semicolon                     // ;
 	Comma                         // ,
 	LeftParen                     // (

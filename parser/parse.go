@@ -332,7 +332,141 @@ func parseFunction(s *lexer.Scanner) (*ast.Function, error) {
 }
 
 func parseLogicalOr(s *lexer.Scanner) (ast.Expression, error) {
+	expr, err := parseLogicalAnd(s)
+	if err != nil {
+		return nil, err
+	}
 
+	for s.Token.Type == lexer.LogicalOr {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		e, err := parseLogicalAnd(s)
+		if err != nil {
+			return nil, err
+		}
+
+		expr = ast.LogicalOrExpression{A: expr, B: e}
+	}
+
+	return expr, nil
+}
+
+func parseLogicalAnd(s *lexer.Scanner) (ast.Expression, error) {
+	expr, err := parseComparison(s)
+	if err != nil {
+		return nil, err
+	}
+
+	for s.Token.Type == lexer.LogicalAnd {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		e, err := parseComparison(s)
+		if err != nil {
+			return nil, err
+		}
+
+		expr = ast.LogicalAndExpression{A: expr, B: e}
+	}
+
+	return expr, nil
+}
+
+func parseComparison(s *lexer.Scanner) (ast.Expression, error) {
+	expr, err := parseTerm(s)
+	if err != nil {
+		return nil, err
+	}
+
+	var op ast.ComparisonOperator = -1
+	switch s.Token.Type {
+	case lexer.EqOperator:
+		op = ast.ComparisonOperatorEq
+	case lexer.LtOperator:
+		op = ast.ComparisonOperatorLt
+	case lexer.LeOperator:
+		op = ast.ComparisonOperatorLe
+	case lexer.GtOperator:
+		op = ast.ComparisonOperatorGt
+	case lexer.GeOperator:
+		op = ast.ComparisonOperatorGe
+	}
+
+	if op != -1 {
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		e, err := parseTerm(s)
+		if err != nil {
+			return nil, err
+		}
+
+		return ast.ComparisonExpression{
+			Operator: op,
+			A:        expr,
+			B:        e,
+		}, nil
+	}
+
+	return expr, nil
+}
+
+func parseTerm(s *lexer.Scanner) (ast.Expression, error) {
+	expr, err := parseAddend(s)
+	if err != nil {
+		return nil, err
+	}
+
+	for s.Token.Type == lexer.AddOperator || s.Token.Type == lexer.SubOperator {
+		isAddition := s.Token.Type == lexer.AddOperator
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		e, err := parseAddend(s)
+		if err != nil {
+			return nil, err
+		}
+
+		if isAddition {
+			expr = ast.AdditionExpression{A: expr, B: e}
+		} else {
+			expr = ast.SubstractionExpression{A: expr, B: e}
+		}
+	}
+
+	return expr, nil
+}
+
+func parseAddend(s *lexer.Scanner) (ast.Expression, error) {
+	expr, err := parseFactor(s)
+	if err != nil {
+		return nil, err
+	}
+
+	for s.Token.Type == lexer.MulOperator || s.Token.Type == lexer.DivOperator {
+		isMultiplication := s.Token.Type == lexer.MulOperator
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		e, err := parseFactor(s)
+		if err != nil {
+			return nil, err
+		}
+
+		if isMultiplication {
+			expr = ast.MultiplicationExpression{A: expr, B: e}
+		} else {
+			expr = ast.DivisionExpression{A: expr, B: e}
+		}
+	}
+
+	return expr, nil
 }
 
 func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
@@ -351,11 +485,17 @@ func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
+		if s.Token.Type == lexer.LeftParen {
+			return parseCall(n, s)
+		}
 		return n, nil
 	case lexer.ID:
 		n := ast.LookupExpression{Identifier: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
+		}
+		if s.Token.Type == lexer.LeftParen {
+			return parseCall(n, s)
 		}
 		return n, nil
 	case lexer.Integer:
@@ -374,7 +514,55 @@ func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 		return n, nil
+	case lexer.TrueKeyword:
+		n := ast.Boolean{Value: true}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
+	case lexer.FalseKeyword:
+		n := ast.Boolean{Value: false}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
 	}
 
 	return nil, fmt.Errorf("Unexpected token %s", s.Token)
+}
+
+func parseCall(callee ast.Expression, s *lexer.Scanner) (ast.Expression, error) {
+	if s.Token.Type != lexer.LeftParen {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	parameters := []ast.Expression{}
+
+	for {
+		e, err := parseExpression(s)
+		if err != nil {
+			return nil, err
+		}
+
+		parameters = append(parameters, e)
+
+		if s.Token.Type != lexer.Comma {
+			break
+		}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+	}
+
+	if s.Token.Type != lexer.RightParen {
+		return nil, fmt.Errorf("Unexpected token %s", s.Token)
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	return ast.CallExpression{Callee: callee, Parameters: parameters}, nil
 }
