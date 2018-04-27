@@ -102,13 +102,15 @@ func (s *Scanner) readNext() error {
 		return err
 	}
 
+	line, column := s.line, s.column
+
 	if r == '"' {
 		// String
 		v, err := s.scanString()
 		if err != nil {
 			return err
 		}
-		s.Token = &Token{Type: String, Value: v}
+		s.Token = &Token{Line: line, Column: column, Type: String, Value: v}
 		return nil
 	}
 
@@ -119,7 +121,7 @@ func (s *Scanner) readNext() error {
 			return err
 		}
 		id := string(r) + v
-		s.Token = &Token{Type: ID, Value: id}
+		s.Token = &Token{Line: line, Column: column, Type: ID, Value: id}
 
 		switch id {
 		case "return":
@@ -152,7 +154,7 @@ func (s *Scanner) readNext() error {
 			return err
 		}
 		num := string(r) + v
-		s.Token = &Token{Type: Integer, Value: num}
+		s.Token = &Token{Line: line, Column: column, Type: Integer, Value: num}
 		return nil
 	}
 
@@ -164,7 +166,7 @@ func (s *Scanner) readNext() error {
 		if r != '=' {
 			return s.unexpectedSymbol(r)
 		}
-		s.Token = &Token{Type: DeclarationOperator, Value: ":="}
+		s.Token = &Token{Line: line, Column: column, Type: DeclarationOperator, Value: ":="}
 		return nil
 	}
 
@@ -175,12 +177,12 @@ func (s *Scanner) readNext() error {
 		}
 
 		if r == '=' {
-			s.Token = &Token{Type: EqOperator, Value: "=="}
+			s.Token = &Token{Line: line, Column: column, Type: EqOperator, Value: "=="}
 		} else {
 			if err := s.unreadRune(); err != nil {
 				return err
 			}
-			s.Token = &Token{Type: AssignmentOperator, Value: "="}
+			s.Token = &Token{Line: line, Column: column, Type: AssignmentOperator, Value: "="}
 		}
 		return nil
 	}
@@ -192,12 +194,12 @@ func (s *Scanner) readNext() error {
 		}
 
 		if r == '=' {
-			s.Token = &Token{Type: LeOperator, Value: "<="}
+			s.Token = &Token{Line: line, Column: column, Type: LeOperator, Value: "<="}
 		} else {
 			if err := s.unreadRune(); err != nil {
 				return err
 			}
-			s.Token = &Token{Type: LtOperator, Value: "<"}
+			s.Token = &Token{Line: line, Column: column, Type: LtOperator, Value: "<"}
 		}
 		return nil
 	}
@@ -209,12 +211,12 @@ func (s *Scanner) readNext() error {
 		}
 
 		if r == '=' {
-			s.Token = &Token{Type: GeOperator, Value: ">="}
+			s.Token = &Token{Line: line, Column: column, Type: GeOperator, Value: ">="}
 		} else {
 			if err := s.unreadRune(); err != nil {
 				return err
 			}
-			s.Token = &Token{Type: GtOperator, Value: ">"}
+			s.Token = &Token{Line: line, Column: column, Type: GtOperator, Value: ">"}
 		}
 		return nil
 	}
@@ -227,7 +229,7 @@ func (s *Scanner) readNext() error {
 		if r != '&' {
 			return s.unexpectedSymbol(r)
 		}
-		s.Token = &Token{Type: LogicalAnd, Value: "&&"}
+		s.Token = &Token{Line: line, Column: column, Type: LogicalAnd, Value: "&&"}
 		return nil
 	}
 
@@ -239,67 +241,67 @@ func (s *Scanner) readNext() error {
 		if r != '|' {
 			return s.unexpectedSymbol(r)
 		}
-		s.Token = &Token{Type: LogicalOr, Value: "||"}
+		s.Token = &Token{Line: line, Column: column, Type: LogicalOr, Value: "||"}
 		return nil
 	}
 
 	if r == '*' {
-		s.Token = &Token{Type: MulOperator, Value: "*"}
+		s.Token = &Token{Line: line, Column: column, Type: MulOperator, Value: "*"}
 		return nil
 	}
 
 	if r == '/' {
-		s.Token = &Token{Type: DivOperator, Value: "/"}
+		s.Token = &Token{Line: line, Column: column, Type: DivOperator, Value: "/"}
 		return nil
 	}
 
 	if r == '+' {
-		s.Token = &Token{Type: AddOperator, Value: "+"}
+		s.Token = &Token{Line: line, Column: column, Type: AddOperator, Value: "+"}
 		return nil
 	}
 
 	if r == '-' {
-		s.Token = &Token{Type: SubOperator, Value: "-"}
+		s.Token = &Token{Line: line, Column: column, Type: SubOperator, Value: "-"}
 		return nil
 	}
 
 	if r == ';' {
-		s.Token = &Token{Type: Semicolon, Value: ";"}
+		s.Token = &Token{Line: line, Column: column, Type: Semicolon, Value: ";"}
 		return nil
 	}
 
 	if r == ',' {
-		s.Token = &Token{Type: Comma, Value: ","}
+		s.Token = &Token{Line: line, Column: column, Type: Comma, Value: ","}
 		return nil
 	}
 
 	if r == '(' {
-		s.Token = &Token{Type: LeftParen, Value: "("}
+		s.Token = &Token{Line: line, Column: column, Type: LeftParen, Value: "("}
 		return nil
 	}
 
 	if r == ')' {
-		s.Token = &Token{Type: RightParen, Value: ")"}
+		s.Token = &Token{Line: line, Column: column, Type: RightParen, Value: ")"}
 		return nil
 	}
 
 	if r == '{' {
-		s.Token = &Token{Type: LeftBrace, Value: "{"}
+		s.Token = &Token{Line: line, Column: column, Type: LeftBrace, Value: "{"}
 		return nil
 	}
 
 	if r == '}' {
-		s.Token = &Token{Type: RightBrace, Value: "}"}
+		s.Token = &Token{Line: line, Column: column, Type: RightBrace, Value: "}"}
 		return nil
 	}
 
 	if r == '[' {
-		s.Token = &Token{Type: LeftBracket, Value: "["}
+		s.Token = &Token{Line: line, Column: column, Type: LeftBracket, Value: "["}
 		return nil
 	}
 
 	if r == ']' {
-		s.Token = &Token{Type: RightBracket, Value: "]"}
+		s.Token = &Token{Line: line, Column: column, Type: RightBracket, Value: "]"}
 		return nil
 	}
 
