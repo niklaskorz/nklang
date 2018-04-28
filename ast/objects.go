@@ -1,7 +1,7 @@
 package ast
 
 type Object interface {
-	Evaluate() (Object, error)
+	Expression
 	IsTrue() bool
 }
 type Function struct {

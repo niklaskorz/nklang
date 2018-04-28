@@ -121,6 +121,7 @@ func (n DivisionExpression) Evaluate() (Object, error) {
 
 type LookupExpression struct {
 	Identifier string
+	ScopeIndex int
 }
 
 func (n LookupExpression) Evaluate() (Object, error) {

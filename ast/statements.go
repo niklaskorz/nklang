@@ -82,6 +82,7 @@ func (n DeclarationStatement) Evaluate() error {
 
 type AssignmentStatement struct {
 	Identifier string
+	ScopeIndex int
 	Value      Expression
 }
 
