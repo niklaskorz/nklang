@@ -346,7 +346,7 @@ func parseLogicalOr(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		expr = &ast.LogicalOrExpression{A: expr, B: e}
+		expr = &ast.BinaryOperationExpression{Operator: ast.BinaryOperatorLor, A: expr, B: e}
 	}
 
 	return expr, nil
@@ -368,7 +368,7 @@ func parseLogicalAnd(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		expr = &ast.LogicalAndExpression{A: expr, B: e}
+		expr = &ast.BinaryOperationExpression{Operator: ast.BinaryOperatorLand, A: expr, B: e}
 	}
 
 	return expr, nil
@@ -380,18 +380,18 @@ func parseComparison(s *lexer.Scanner) (ast.Expression, error) {
 		return nil, err
 	}
 
-	var op ast.ComparisonOperator = -1
+	var op ast.BinaryOperator = -1
 	switch s.Token.Type {
 	case lexer.EqOperator:
-		op = ast.ComparisonOperatorEq
+		op = ast.BinaryOperatorEq
 	case lexer.LtOperator:
-		op = ast.ComparisonOperatorLt
+		op = ast.BinaryOperatorLt
 	case lexer.LeOperator:
-		op = ast.ComparisonOperatorLe
+		op = ast.BinaryOperatorLe
 	case lexer.GtOperator:
-		op = ast.ComparisonOperatorGt
+		op = ast.BinaryOperatorGt
 	case lexer.GeOperator:
-		op = ast.ComparisonOperatorGe
+		op = ast.BinaryOperatorGe
 	}
 
 	if op != -1 {
@@ -404,7 +404,7 @@ func parseComparison(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		return &ast.ComparisonExpression{
+		return &ast.BinaryOperationExpression{
 			Operator: op,
 			A:        expr,
 			B:        e,
@@ -421,7 +421,12 @@ func parseTerm(s *lexer.Scanner) (ast.Expression, error) {
 	}
 
 	for s.Token.Type == lexer.AddOperator || s.Token.Type == lexer.SubOperator {
-		isAddition := s.Token.Type == lexer.AddOperator
+		var op ast.BinaryOperator
+		if s.Token.Type == lexer.AddOperator {
+			op = ast.BinaryOperatorAdd
+		} else {
+			op = ast.BinaryOperatorSub
+		}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -431,11 +436,7 @@ func parseTerm(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		if isAddition {
-			expr = &ast.AdditionExpression{A: expr, B: e}
-		} else {
-			expr = &ast.SubstractionExpression{A: expr, B: e}
-		}
+		expr = &ast.BinaryOperationExpression{Operator: op, A: expr, B: e}
 	}
 
 	return expr, nil
@@ -448,7 +449,12 @@ func parseAddend(s *lexer.Scanner) (ast.Expression, error) {
 	}
 
 	for s.Token.Type == lexer.MulOperator || s.Token.Type == lexer.DivOperator {
-		isMultiplication := s.Token.Type == lexer.MulOperator
+		var op ast.BinaryOperator
+		if s.Token.Type == lexer.MulOperator {
+			op = ast.BinaryOperatorMul
+		} else {
+			op = ast.BinaryOperatorDiv
+		}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -458,11 +464,7 @@ func parseAddend(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		if isMultiplication {
-			expr = &ast.MultiplicationExpression{A: expr, B: e}
-		} else {
-			expr = &ast.DivisionExpression{A: expr, B: e}
-		}
+		expr = &ast.BinaryOperationExpression{Operator: op, A: expr, B: e}
 	}
 
 	return expr, nil

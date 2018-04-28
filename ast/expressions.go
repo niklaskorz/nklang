@@ -34,95 +34,33 @@ func (n *IfExpression) Evaluate() (Object, error) {
 	return n.ElseBranch.Evaluate()
 }
 
-type LogicalOrExpression struct {
-	A Expression
-	B Expression
-}
-
-func (n *LogicalOrExpression) Evaluate() (Object, error) {
-	a, err := n.A.Evaluate()
-	if err != nil {
-		return nil, err
-	}
-	if a.IsTrue() {
-		return a, nil
-	}
-	return n.B.Evaluate()
-}
-
-type LogicalAndExpression struct {
-	A Expression
-	B Expression
-}
-
-func (n *LogicalAndExpression) Evaluate() (Object, error) {
-	a, err := n.A.Evaluate()
-	if err != nil {
-		return nil, err
-	}
-	if a.IsTrue() {
-		return n.B.Evaluate()
-	}
-	return a, nil
-}
-
-type ComparisonOperator int
+type BinaryOperator int
 
 const (
-	ComparisonOperatorEq ComparisonOperator = iota
-	ComparisonOperatorLt
-	ComparisonOperatorLe
-	ComparisonOperatorGt
-	ComparisonOperatorGe
+	BinaryOperatorEq BinaryOperator = iota
+	BinaryOperatorLt
+	BinaryOperatorLe
+	BinaryOperatorGt
+	BinaryOperatorGe
+	BinaryOperatorLand
+	BinaryOperatorLor
+	BinaryOperatorAdd
+	BinaryOperatorSub
+	BinaryOperatorMul
+	BinaryOperatorDiv
 )
 
-type ComparisonExpression struct {
-	Operator ComparisonOperator
+type BinaryOperationExpression struct {
+	Operator BinaryOperator
 	A        Expression
 	B        Expression
 }
 
-func (n *ComparisonExpression) Evaluate() (Object, error) {
-	// TODO: Implement
-	return &Boolean{Value: true}, nil
+func (n *BinaryOperationExpression) String() string {
+	return fmt.Sprintf("BinaryOperationExpression{Operator: %d, A: %s, B: %s}", n.Operator, n.A, n.B)
 }
 
-type AdditionExpression struct {
-	A Expression
-	B Expression
-}
-
-func (n *AdditionExpression) Evaluate() (Object, error) {
-	// TODO: Implement
-	return &Integer{Value: 0}, nil
-}
-
-type SubstractionExpression struct {
-	A Expression
-	B Expression
-}
-
-func (n *SubstractionExpression) Evaluate() (Object, error) {
-	// TODO: Implement
-	return &Integer{Value: 0}, nil
-}
-
-type MultiplicationExpression struct {
-	A Expression
-	B Expression
-}
-
-func (n *MultiplicationExpression) Evaluate() (Object, error) {
-	// TODO: Implement
-	return &Integer{Value: 0}, nil
-}
-
-type DivisionExpression struct {
-	A Expression
-	B Expression
-}
-
-func (n *DivisionExpression) Evaluate() (Object, error) {
+func (n *BinaryOperationExpression) Evaluate() (Object, error) {
 	// TODO: Implement
 	return &Integer{Value: 0}, nil
 }
@@ -130,6 +68,10 @@ func (n *DivisionExpression) Evaluate() (Object, error) {
 type LookupExpression struct {
 	Identifier string
 	ScopeIndex int
+}
+
+func (n *LookupExpression) String() string {
+	return fmt.Sprintf("LookupExpression{Identifier: %s, ScopeIndex: %d}", n.Identifier, n.ScopeIndex)
 }
 
 func (n *LookupExpression) Evaluate() (Object, error) {
@@ -140,6 +82,10 @@ func (n *LookupExpression) Evaluate() (Object, error) {
 type CallExpression struct {
 	Callee     Expression
 	Parameters []Expression
+}
+
+func (n *CallExpression) String() string {
+	return fmt.Sprintf("CallExpresion{Callee: %s, Parameters: %d}", n.Callee, n.Parameters)
 }
 
 func (n *CallExpression) Evaluate() (Object, error) {

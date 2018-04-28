@@ -126,49 +126,7 @@ func analyzeExpression(scope *definitionScope, n ast.Expression) error {
 				return err
 			}
 		}
-	case *ast.LogicalOrExpression:
-		if err := analyzeExpression(scope, e.A); err != nil {
-			return err
-		}
-		if err := analyzeExpression(scope, e.B); err != nil {
-			return err
-		}
-	case *ast.LogicalAndExpression:
-		if err := analyzeExpression(scope, e.A); err != nil {
-			return err
-		}
-		if err := analyzeExpression(scope, e.B); err != nil {
-			return err
-		}
-	case *ast.ComparisonExpression:
-		if err := analyzeExpression(scope, e.A); err != nil {
-			return err
-		}
-		if err := analyzeExpression(scope, e.B); err != nil {
-			return err
-		}
-	case *ast.AdditionExpression:
-		if err := analyzeExpression(scope, e.A); err != nil {
-			return err
-		}
-		if err := analyzeExpression(scope, e.B); err != nil {
-			return err
-		}
-	case *ast.SubstractionExpression:
-		if err := analyzeExpression(scope, e.A); err != nil {
-			return err
-		}
-		if err := analyzeExpression(scope, e.B); err != nil {
-			return err
-		}
-	case *ast.MultiplicationExpression:
-		if err := analyzeExpression(scope, e.A); err != nil {
-			return err
-		}
-		if err := analyzeExpression(scope, e.B); err != nil {
-			return err
-		}
-	case *ast.DivisionExpression:
+	case *ast.BinaryOperationExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
