@@ -80,7 +80,7 @@ func analyzeStatement(scope *definitionScope, n ast.Statement) error {
 				return err
 			}
 		}
-	case ast.DeclarationStatement:
+	case *ast.DeclarationStatement:
 		if err := analyzeExpression(scope, s.Value); err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func analyzeStatement(scope *definitionScope, n ast.Statement) error {
 			return fmt.Errorf("Redeclaration of %s in same scope", s.Identifier)
 		}
 		scope.definitions.set(s.Identifier)
-	case ast.AssignmentStatement:
+	case *ast.AssignmentStatement:
 		if err := analyzeExpression(scope, s.Value); err != nil {
 			return err
 		}
@@ -97,11 +97,11 @@ func analyzeStatement(scope *definitionScope, n ast.Statement) error {
 			return fmt.Errorf("%s must be declared before assignment", s.Identifier)
 		}
 		s.ScopeIndex = scopeIndex
-	case ast.ReturnStatement:
+	case *ast.ReturnStatement:
 		if err := analyzeExpression(scope, s.Expression); err != nil {
 			return err
 		}
-	case ast.ExpressionStatement:
+	case *ast.ExpressionStatement:
 		if err := analyzeExpression(scope, s.Expression); err != nil {
 			return err
 		}
@@ -126,62 +126,62 @@ func analyzeExpression(scope *definitionScope, n ast.Expression) error {
 				return err
 			}
 		}
-	case ast.LogicalOrExpression:
+	case *ast.LogicalOrExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
 		if err := analyzeExpression(scope, e.B); err != nil {
 			return err
 		}
-	case ast.LogicalAndExpression:
+	case *ast.LogicalAndExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
 		if err := analyzeExpression(scope, e.B); err != nil {
 			return err
 		}
-	case ast.ComparisonExpression:
+	case *ast.ComparisonExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
 		if err := analyzeExpression(scope, e.B); err != nil {
 			return err
 		}
-	case ast.AdditionExpression:
+	case *ast.AdditionExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
 		if err := analyzeExpression(scope, e.B); err != nil {
 			return err
 		}
-	case ast.SubstractionExpression:
+	case *ast.SubstractionExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
 		if err := analyzeExpression(scope, e.B); err != nil {
 			return err
 		}
-	case ast.MultiplicationExpression:
+	case *ast.MultiplicationExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
 		if err := analyzeExpression(scope, e.B); err != nil {
 			return err
 		}
-	case ast.DivisionExpression:
+	case *ast.DivisionExpression:
 		if err := analyzeExpression(scope, e.A); err != nil {
 			return err
 		}
 		if err := analyzeExpression(scope, e.B); err != nil {
 			return err
 		}
-	case ast.LookupExpression:
+	case *ast.LookupExpression:
 		scopeIndex := scope.lookup(e.Identifier, 0)
 		if scopeIndex == -1 {
 			return fmt.Errorf("%s must be declared before usage", e.Identifier)
 		}
 		e.ScopeIndex = scopeIndex
-	case ast.CallExpression:
+	case *ast.CallExpression:
 		if err := analyzeExpression(scope, e.Callee); err != nil {
 			return err
 		}

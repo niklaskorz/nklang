@@ -1,13 +1,13 @@
-a := "Hello World
-
-This is a test
-";
+a := "Hello World";
 x := 5;
 y := 3;
 a = x;
 z := 9;
 if z >= x {
     y := z - x;
+    a = 1;
+    a := 1;
+    a = 1;
 }
 
 pi := if x < 3 {

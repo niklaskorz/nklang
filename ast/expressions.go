@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type Expression interface {
 	Evaluate() (Object, error)
 }
@@ -10,7 +14,11 @@ type IfExpression struct {
 	ElseBranch *IfExpression
 }
 
-func (n IfExpression) Evaluate() (Object, error) {
+func (n *IfExpression) String() string {
+	return fmt.Sprintf("IfExpression{Condition: %s, Value: %s, ElseBranch: %s}", n.Condition, n.Value, n.ElseBranch)
+}
+
+func (n *IfExpression) Evaluate() (Object, error) {
 	if n.Condition == nil {
 		return n.Value.Evaluate()
 	}
@@ -31,7 +39,7 @@ type LogicalOrExpression struct {
 	B Expression
 }
 
-func (n LogicalOrExpression) Evaluate() (Object, error) {
+func (n *LogicalOrExpression) Evaluate() (Object, error) {
 	a, err := n.A.Evaluate()
 	if err != nil {
 		return nil, err
@@ -47,7 +55,7 @@ type LogicalAndExpression struct {
 	B Expression
 }
 
-func (n LogicalAndExpression) Evaluate() (Object, error) {
+func (n *LogicalAndExpression) Evaluate() (Object, error) {
 	a, err := n.A.Evaluate()
 	if err != nil {
 		return nil, err
@@ -74,9 +82,9 @@ type ComparisonExpression struct {
 	B        Expression
 }
 
-func (n ComparisonExpression) Evaluate() (Object, error) {
+func (n *ComparisonExpression) Evaluate() (Object, error) {
 	// TODO: Implement
-	return Boolean{Value: true}, nil
+	return &Boolean{Value: true}, nil
 }
 
 type AdditionExpression struct {
@@ -84,9 +92,9 @@ type AdditionExpression struct {
 	B Expression
 }
 
-func (n AdditionExpression) Evaluate() (Object, error) {
+func (n *AdditionExpression) Evaluate() (Object, error) {
 	// TODO: Implement
-	return Integer{Value: 0}, nil
+	return &Integer{Value: 0}, nil
 }
 
 type SubstractionExpression struct {
@@ -94,9 +102,9 @@ type SubstractionExpression struct {
 	B Expression
 }
 
-func (n SubstractionExpression) Evaluate() (Object, error) {
+func (n *SubstractionExpression) Evaluate() (Object, error) {
 	// TODO: Implement
-	return Integer{Value: 0}, nil
+	return &Integer{Value: 0}, nil
 }
 
 type MultiplicationExpression struct {
@@ -104,9 +112,9 @@ type MultiplicationExpression struct {
 	B Expression
 }
 
-func (n MultiplicationExpression) Evaluate() (Object, error) {
+func (n *MultiplicationExpression) Evaluate() (Object, error) {
 	// TODO: Implement
-	return Integer{Value: 0}, nil
+	return &Integer{Value: 0}, nil
 }
 
 type DivisionExpression struct {
@@ -114,9 +122,9 @@ type DivisionExpression struct {
 	B Expression
 }
 
-func (n DivisionExpression) Evaluate() (Object, error) {
+func (n *DivisionExpression) Evaluate() (Object, error) {
 	// TODO: Implement
-	return Integer{Value: 0}, nil
+	return &Integer{Value: 0}, nil
 }
 
 type LookupExpression struct {
@@ -124,9 +132,9 @@ type LookupExpression struct {
 	ScopeIndex int
 }
 
-func (n LookupExpression) Evaluate() (Object, error) {
+func (n *LookupExpression) Evaluate() (Object, error) {
 	// TODO: Implement lookup
-	return Integer{Value: 0}, nil
+	return &Integer{Value: 0}, nil
 }
 
 type CallExpression struct {
@@ -134,7 +142,7 @@ type CallExpression struct {
 	Parameters []Expression
 }
 
-func (n CallExpression) Evaluate() (Object, error) {
+func (n *CallExpression) Evaluate() (Object, error) {
 	// TODO: Implement
-	return Integer{Value: 0}, nil
+	return &Integer{Value: 0}, nil
 }

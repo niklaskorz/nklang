@@ -49,12 +49,12 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
-		n = ast.ContinueStatement{}
+		n = &ast.ContinueStatement{}
 	} else if s.Token.Type == lexer.BreakKeyword {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
-		n = ast.BreakStatement{}
+		n = &ast.BreakStatement{}
 	} else if s.Token.Type == lexer.ReturnKeyword {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
@@ -63,7 +63,7 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 		if err != nil {
 			return nil, err
 		}
-		n = ast.ReturnStatement{Expression: e}
+		n = &ast.ReturnStatement{Expression: e}
 	} else if s.Token.Type == lexer.ID {
 		identifier := s.Token.Value
 		if err := s.ReadNext(); err != nil {
@@ -77,7 +77,7 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 			if err != nil {
 				return nil, err
 			}
-			n = ast.DeclarationStatement{Identifier: identifier, Value: v}
+			n = &ast.DeclarationStatement{Identifier: identifier, Value: v}
 		} else if s.Token.Type == lexer.AssignmentOperator {
 			if err := s.ReadNext(); err != nil {
 				return nil, err
@@ -86,7 +86,7 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 			if err != nil {
 				return nil, err
 			}
-			n = ast.AssignmentStatement{Identifier: identifier, Value: v}
+			n = &ast.AssignmentStatement{Identifier: identifier, Value: v}
 		} else {
 			if err := s.Unread(); err != nil {
 				return nil, err
@@ -95,14 +95,14 @@ func parseStatement(s *lexer.Scanner) (ast.Statement, error) {
 			if err != nil {
 				return nil, err
 			}
-			n = ast.ExpressionStatement{Expression: e}
+			n = &ast.ExpressionStatement{Expression: e}
 		}
 	} else {
 		e, err := parseExpression(s)
 		if err != nil {
 			return nil, err
 		}
-		n = ast.ExpressionStatement{Expression: e}
+		n = &ast.ExpressionStatement{Expression: e}
 	}
 
 	if s.Token.Type != lexer.Semicolon {
@@ -346,7 +346,7 @@ func parseLogicalOr(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		expr = ast.LogicalOrExpression{A: expr, B: e}
+		expr = &ast.LogicalOrExpression{A: expr, B: e}
 	}
 
 	return expr, nil
@@ -368,7 +368,7 @@ func parseLogicalAnd(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		expr = ast.LogicalAndExpression{A: expr, B: e}
+		expr = &ast.LogicalAndExpression{A: expr, B: e}
 	}
 
 	return expr, nil
@@ -404,7 +404,7 @@ func parseComparison(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 
-		return ast.ComparisonExpression{
+		return &ast.ComparisonExpression{
 			Operator: op,
 			A:        expr,
 			B:        e,
@@ -432,9 +432,9 @@ func parseTerm(s *lexer.Scanner) (ast.Expression, error) {
 		}
 
 		if isAddition {
-			expr = ast.AdditionExpression{A: expr, B: e}
+			expr = &ast.AdditionExpression{A: expr, B: e}
 		} else {
-			expr = ast.SubstractionExpression{A: expr, B: e}
+			expr = &ast.SubstractionExpression{A: expr, B: e}
 		}
 	}
 
@@ -459,9 +459,9 @@ func parseAddend(s *lexer.Scanner) (ast.Expression, error) {
 		}
 
 		if isMultiplication {
-			expr = ast.MultiplicationExpression{A: expr, B: e}
+			expr = &ast.MultiplicationExpression{A: expr, B: e}
 		} else {
-			expr = ast.DivisionExpression{A: expr, B: e}
+			expr = &ast.DivisionExpression{A: expr, B: e}
 		}
 	}
 
@@ -489,7 +489,7 @@ func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
 		}
 		return n, nil
 	case lexer.ID:
-		n := ast.LookupExpression{Identifier: s.Token.Value}
+		n := &ast.LookupExpression{Identifier: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -502,25 +502,25 @@ func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
 		if err != nil {
 			return nil, err
 		}
-		n := ast.Integer{Value: num}
+		n := &ast.Integer{Value: num}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
 		return n, nil
 	case lexer.String:
-		n := ast.String{Value: s.Token.Value}
+		n := &ast.String{Value: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
 		return n, nil
 	case lexer.TrueKeyword:
-		n := ast.Boolean{Value: true}
+		n := &ast.Boolean{Value: true}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
 		return n, nil
 	case lexer.FalseKeyword:
-		n := ast.Boolean{Value: false}
+		n := &ast.Boolean{Value: false}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -563,5 +563,5 @@ func parseCall(callee ast.Expression, s *lexer.Scanner) (ast.Expression, error) 
 		return nil, err
 	}
 
-	return ast.CallExpression{Callee: callee, Parameters: parameters}, nil
+	return &ast.CallExpression{Callee: callee, Parameters: parameters}, nil
 }
