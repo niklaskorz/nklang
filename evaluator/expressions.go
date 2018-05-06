@@ -86,3 +86,44 @@ func evaluateBinaryExpression(n *ast.BinaryOperationExpression, scope *definitio
 
 	return nil, fmt.Errorf("Unknown binary expression")
 }
+
+func evaluateLookupExpression(n *ast.LookupExpression, scope *definitionScope) (objects.Object, error) {
+	return scope.lookup(n.Identifier, n.ScopeIndex), nil
+}
+
+func evaluateCallExpression(n *ast.CallExpression, scope *definitionScope) (objects.Object, error) {
+	callee, err := evaluateExpression(n.Callee, scope)
+	if err != nil {
+		return nil, err
+	}
+
+	switch callee := callee.(type) {
+	case *objects.Function:
+		return evaluateFunctionCall(callee, n.Parameters, scope)
+	}
+
+	return nil, objects.OperationNotSupportedError{}
+}
+
+func evaluateFunctionCall(o *objects.Function, params []ast.Expression, scope *definitionScope) (objects.Object, error) {
+	parameterScope := scope.newScope()
+	for i, p := range params {
+		v, err := evaluateExpression(p, scope)
+		if err != nil {
+			return nil, err
+		}
+		name := o.Parameters[i]
+		parameterScope.declare(name, v)
+	}
+
+	if err := evaluateStatements(o.Statements, parameterScope.newScope()); err != nil {
+		switch err := err.(type) {
+		case *returnError:
+			return err.value, nil
+		default:
+			return nil, err
+		}
+	}
+
+	return &objects.Nil{}, nil
+}

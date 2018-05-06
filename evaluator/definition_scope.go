@@ -9,6 +9,12 @@ type definitionScope struct {
 	definitions definitionMap
 }
 
+func NewScope() *definitionScope {
+	return &definitionScope{
+		definitions: make(definitionMap),
+	}
+}
+
 func (scope *definitionScope) newScope() *definitionScope {
 	return &definitionScope{
 		parent:      scope,
