@@ -54,7 +54,7 @@ func analyzeStatement(scope *definitionScope, n ast.Statement) error {
 		if scope.definitions.has(s.Identifier) {
 			return fmt.Errorf("Redeclaration of %s in same scope", s.Identifier)
 		}
-		scope.definitions.set(s.Identifier)
+		scope.declare(s.Identifier)
 	case *ast.AssignmentStatement:
 		if err := analyzeExpression(scope, s.Value); err != nil {
 			return err
@@ -118,7 +118,7 @@ func analyzeExpression(scope *definitionScope, n ast.Expression) error {
 	case *ast.Function:
 		ds := scope.newScope()
 		for _, p := range e.Parameters {
-			ds.definitions.set(p)
+			ds.declare(p)
 		}
 		for _, s := range e.Statements {
 			if err := analyzeStatement(ds, s); err != nil {

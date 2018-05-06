@@ -32,3 +32,7 @@ func (scope *definitionScope) lookup(name string, index int) int {
 	}
 	return scope.parent.lookup(name, index+1)
 }
+
+func (scope *definitionScope) declare(name string) {
+	scope.definitions.set(name)
+}
