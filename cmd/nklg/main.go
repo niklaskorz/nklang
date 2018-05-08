@@ -58,7 +58,12 @@ func pfInput(params []evaluator.Object) (evaluator.Object, error) {
 }
 
 func main() {
-	f, err := os.Open("example.nk")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage:", os.Args[0], "<source file>")
+		return
+	}
+
+	f, err := os.Open(os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		return
