@@ -104,7 +104,7 @@ func evaluateCallExpression(n *ast.CallExpression, scope *definitionScope) (Obje
 	case *Function:
 		return evaluateFunctionCall(callee, n.Parameters, scope)
 	case PredefinedFunction:
-		return evaluatePredefinedFunction(callee, n.Parameters, scope)
+		return evaluatePredefinedFunctionCall(callee, n.Parameters, scope)
 	}
 
 	return nil, OperationNotSupportedError{}
@@ -133,7 +133,7 @@ func evaluateFunctionCall(o *Function, params []ast.Expression, scope *definitio
 	return NilObject, nil
 }
 
-func evaluatePredefinedFunction(o PredefinedFunction, params []ast.Expression, scope *definitionScope) (Object, error) {
+func evaluatePredefinedFunctionCall(o PredefinedFunction, params []ast.Expression, scope *definitionScope) (Object, error) {
 	parameters := []Object{}
 	for _, p := range params {
 		v, err := evaluateExpression(p, scope)
