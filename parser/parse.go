@@ -302,10 +302,10 @@ func parseFunction(s *lexer.Scanner) (*ast.Function, error) {
 	parameters := []string{}
 
 	for s.Token.Type == lexer.ID {
+		parameters = append(parameters, s.Token.Value)
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
-		parameters = append(parameters, s.Token.Value)
 
 		if s.Token.Type != lexer.Comma {
 			break
