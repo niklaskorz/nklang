@@ -59,5 +59,15 @@ if isLow {
     println("It's not low");
 }
 
+faculty := nil;
+faculty = func(n) {
+    if n == 0 {
+        return 1;
+    }
+    return n * faculty(n - 1);
+};
+
+println("9! =", faculty(9));
+
 name := input("What's your name?");
 println("So your name is", name);
