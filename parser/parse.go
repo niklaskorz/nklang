@@ -3,8 +3,8 @@ package parser
 import (
 	"strconv"
 
-	"niklaskorz.de/nklang/ast"
-	"niklaskorz.de/nklang/lexer"
+	"github.com/niklaskorz/nklang/ast"
+	"github.com/niklaskorz/nklang/lexer"
 )
 
 func Parse(s *lexer.Scanner) (*ast.Program, error) {

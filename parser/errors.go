@@ -3,7 +3,7 @@ package parser
 import (
 	"fmt"
 
-	"niklaskorz.de/nklang/lexer"
+	"github.com/niklaskorz/nklang/lexer"
 )
 
 type UnexpectedTokenError struct {

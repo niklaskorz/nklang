@@ -5,11 +5,11 @@ import (
 	"os"
 	"strconv"
 
-	"niklaskorz.de/nklang/evaluator"
+	"github.com/niklaskorz/nklang/evaluator"
 
-	"niklaskorz.de/nklang/lexer"
-	"niklaskorz.de/nklang/parser"
-	"niklaskorz.de/nklang/semantics"
+	"github.com/niklaskorz/nklang/lexer"
+	"github.com/niklaskorz/nklang/parser"
+	"github.com/niklaskorz/nklang/semantics"
 )
 
 func pfPrintln(params []evaluator.Object) (evaluator.Object, error) {

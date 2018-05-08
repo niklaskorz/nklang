@@ -3,7 +3,7 @@ package semantics
 import (
 	"fmt"
 
-	"niklaskorz.de/nklang/ast"
+	"github.com/niklaskorz/nklang/ast"
 )
 
 func AnalyzeLookups(p *ast.Program) error {

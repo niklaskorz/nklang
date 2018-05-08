@@ -1,7 +1,7 @@
 package evaluator
 
 import (
-	"niklaskorz.de/nklang/ast"
+	"github.com/niklaskorz/nklang/ast"
 )
 
 func evaluateStatements(statements []ast.Statement, scope *definitionScope) error {

@@ -1,6 +1,6 @@
 package evaluator
 
-import "niklaskorz.de/nklang/ast"
+import "github.com/niklaskorz/nklang/ast"
 
 func Evaluate(p *ast.Program) error {
 	return EvaluateWithScope(p, NewScope())

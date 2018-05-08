@@ -3,7 +3,7 @@ package evaluator
 import (
 	"fmt"
 
-	"niklaskorz.de/nklang/ast"
+	"github.com/niklaskorz/nklang/ast"
 )
 
 func evaluateExpression(n ast.Expression, scope *definitionScope) (Object, error) {
