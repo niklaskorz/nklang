@@ -40,6 +40,7 @@ factor = "(" expr ")" [ call ]
        | STR
        | "true"
        | "false"
+       | "nil"
        ;
 
 call = "(" [ expr { "," expr } ] ")" ;
