@@ -2,6 +2,20 @@ add := func(a, b) {
     return a + b;
 };
 
+mul := func(a) {
+    x := a;
+    return func(b) {
+        return x * b;
+    };
+};
+
+test := func(f) {
+    x := 42;
+    return f(x);
+};
+
+println(test(mul(2)));
+
 println(add);
 println(add(50, 30));
 
@@ -29,3 +43,18 @@ pi := if x < 3 {
 };
 println("x:", x);
 println("pi:", pi);
+
+isCool := true;
+isLow := false;
+
+println("isCool:", isCool);
+if isCool {
+    println("It's cool!");
+} else {
+    println("It's not cool!");
+}
+if isLow {
+    println("It's low");
+} else {
+    println("It's not low");
+}
