@@ -16,6 +16,10 @@ type definitionScope struct {
 	definitions definitionSet
 }
 
+func NewScope() *definitionScope {
+	return &definitionScope{definitions: make(definitionSet)}
+}
+
 func (scope *definitionScope) newScope() *definitionScope {
 	return &definitionScope{
 		parent:      scope,
@@ -34,5 +38,9 @@ func (scope *definitionScope) lookup(name string, index int) int {
 }
 
 func (scope *definitionScope) declare(name string) {
+	scope.definitions.set(name)
+}
+
+func (scope *definitionScope) Declare(name string) {
 	scope.definitions.set(name)
 }

@@ -8,9 +8,12 @@ import (
 
 func AnalyzeLookups(p *ast.Program) error {
 	globalScope := &definitionScope{definitions: make(definitionSet)}
+	return AnalyzeLookupsWithScope(p, globalScope)
+}
 
+func AnalyzeLookupsWithScope(p *ast.Program, scope *definitionScope) error {
 	for _, n := range p.Statements {
-		if err := analyzeStatement(globalScope, n); err != nil {
+		if err := analyzeStatement(scope, n); err != nil {
 			return err
 		}
 	}

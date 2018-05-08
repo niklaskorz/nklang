@@ -33,9 +33,14 @@ func (scope *definitionScope) declare(name string, value objects.Object) {
 	scope.definitions[name] = value
 }
 
+func (scope *definitionScope) Declare(name string, value objects.Object) {
+	scope.definitions[name] = value
+}
+
 func (scope *definitionScope) assign(name string, value objects.Object, index int) {
 	if index == 0 {
 		scope.definitions[name] = value
+		return
 	}
 	scope.assign(name, value, index-1)
 }
