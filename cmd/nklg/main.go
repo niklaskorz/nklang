@@ -46,14 +46,12 @@ func pfPrintln(params []objects.Object) (objects.Object, error) {
 }
 
 func main() {
-	fmt.Println("nklang version 0.1")
 	f, err := os.Open("example.nk")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println("Parsing...")
 	s := lexer.NewScanner(f)
 	p, err := parser.Parse(s)
 	if err != nil {
@@ -61,19 +59,14 @@ func main() {
 		return
 	}
 
-	fmt.Println("Analyzing...")
 	ds := semantics.NewScope()
 	ds.Declare("println")
 	if err := semantics.AnalyzeLookupsWithScope(p, ds); err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("%+v\n", p)
-
-	fmt.Println("Evaluating...")
 
 	pfPrintln := objects.PredefinedFunction(pfPrintln)
-
 	scope := evaluator.NewScope()
 	scope.Declare("println", pfPrintln)
 
