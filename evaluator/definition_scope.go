@@ -40,5 +40,5 @@ func (scope *definitionScope) assign(name string, value Object, index int) {
 		scope.definitions[name] = value
 		return
 	}
-	scope.assign(name, value, index-1)
+	scope.parent.assign(name, value, index-1)
 }
