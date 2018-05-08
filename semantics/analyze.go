@@ -51,22 +51,22 @@ func analyzeStatement(scope *definitionScope, n ast.Statement) error {
 			}
 		}
 	case *ast.DeclarationStatement:
-		if err := analyzeExpression(scope, s.Value); err != nil {
-			return err
-		}
 		if scope.definitions.has(s.Identifier) {
 			return fmt.Errorf("Redeclaration of %s in same scope", s.Identifier)
 		}
 		scope.declare(s.Identifier)
-	case *ast.AssignmentStatement:
 		if err := analyzeExpression(scope, s.Value); err != nil {
 			return err
 		}
+	case *ast.AssignmentStatement:
 		scopeIndex := scope.lookup(s.Identifier, 0)
 		if scopeIndex == -1 {
 			return fmt.Errorf("%s must be declared before assignment", s.Identifier)
 		}
 		s.ScopeIndex = scopeIndex
+		if err := analyzeExpression(scope, s.Value); err != nil {
+			return err
+		}
 	case *ast.ReturnStatement:
 		if err := analyzeExpression(scope, s.Expression); err != nil {
 			return err

@@ -59,8 +59,7 @@ if isLow {
     println("It's not low");
 }
 
-faculty := nil;
-faculty = func(n) {
+faculty := func(n) {
     if n == 0 {
         return 1;
     }
