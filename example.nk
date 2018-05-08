@@ -1,4 +1,13 @@
+add := func(a, b) {
+    return a + b;
+};
+
+println(add);
+println(add(50, 30));
+
 a := "Hello World";
+println(a);
+
 x := 5;
 y := 3;
 a = x;
@@ -7,12 +16,16 @@ if z >= x {
     y := z - x;
     a = 1;
     a := 1;
-    a = 1;
+    a = a + 1;
+    println("y:", y);
+    println("a:", a);
 }
+println("a:", a);
 
 pi := if x < 3 {
     3
 } else {
     9
 };
-println("Hello world!");
+println("x:", x);
+println("pi:", pi);

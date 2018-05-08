@@ -6,35 +6,34 @@ import (
 	"strconv"
 
 	"niklaskorz.de/nklang/evaluator"
-	"niklaskorz.de/nklang/evaluator/objects"
 
 	"niklaskorz.de/nklang/lexer"
 	"niklaskorz.de/nklang/parser"
 	"niklaskorz.de/nklang/semantics"
 )
 
-func pfPrintln(params []objects.Object) (objects.Object, error) {
+func pfPrintln(params []evaluator.Object) (evaluator.Object, error) {
 	s := ""
 	for i, p := range params {
 		if i != 0 {
 			s += " "
 		}
 		switch p := p.(type) {
-		case *objects.String:
+		case *evaluator.String:
 			s += p.Value
-		case *objects.Integer:
+		case *evaluator.Integer:
 			s += strconv.FormatInt(p.Value, 10)
-		case *objects.Boolean:
+		case *evaluator.Boolean:
 			if p.Value {
 				s += "true"
 			} else {
 				s += "false"
 			}
-		case *objects.Nil:
+		case *evaluator.Nil:
 			s += "nil"
-		case *objects.Function:
+		case *evaluator.Function:
 			s += "[Function]"
-		case *objects.PredefinedFunction:
+		case *evaluator.PredefinedFunction:
 			s += "[PredefinedFunction]"
 		default:
 			s += "[Object]"
@@ -42,7 +41,7 @@ func pfPrintln(params []objects.Object) (objects.Object, error) {
 	}
 
 	fmt.Println(s)
-	return objects.NilObject, nil
+	return evaluator.NilObject, nil
 }
 
 func main() {
@@ -66,7 +65,7 @@ func main() {
 		return
 	}
 
-	pfPrintln := objects.PredefinedFunction(pfPrintln)
+	pfPrintln := evaluator.PredefinedFunction(pfPrintln)
 	scope := evaluator.NewScope()
 	scope.Declare("println", pfPrintln)
 

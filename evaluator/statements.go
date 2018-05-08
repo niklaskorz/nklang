@@ -2,7 +2,6 @@ package evaluator
 
 import (
 	"niklaskorz.de/nklang/ast"
-	"niklaskorz.de/nklang/evaluator/objects"
 )
 
 func evaluateStatements(statements []ast.Statement, scope *definitionScope) error {
@@ -94,7 +93,7 @@ func evaluateAssignmentStatement(n *ast.AssignmentStatement, scope *definitionSc
 }
 
 type returnError struct {
-	value objects.Object
+	value Object
 }
 
 func (r *returnError) Error() string {

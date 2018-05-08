@@ -123,8 +123,9 @@ func analyzeExpression(scope *definitionScope, n ast.Expression) error {
 		for _, p := range e.Parameters {
 			ds.declare(p)
 		}
+		scope := ds.newScope()
 		for _, s := range e.Statements {
-			if err := analyzeStatement(ds, s); err != nil {
+			if err := analyzeStatement(scope, s); err != nil {
 				return err
 			}
 		}
