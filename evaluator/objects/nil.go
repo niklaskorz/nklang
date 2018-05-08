@@ -4,6 +4,8 @@ import "niklaskorz.de/nklang/ast"
 
 type Nil ast.Nil
 
+var NilObject = &Nil{}
+
 func (o *Nil) IsTrue() bool {
 	return false
 }

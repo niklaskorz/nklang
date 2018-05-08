@@ -141,6 +141,8 @@ func (s *Scanner) readNext() error {
 			s.Token.Type = TrueKeyword
 		case "false":
 			s.Token.Type = FalseKeyword
+		case "nil":
+			s.Token.Type = NilKeyword
 		}
 
 		return nil

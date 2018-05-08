@@ -21,6 +21,10 @@ func evaluateExpression(n ast.Expression, scope *definitionScope) (objects.Objec
 		return evaluateIfExpression(e, scope)
 	case *ast.BinaryOperationExpression:
 		return evaluateBinaryExpression(e, scope)
+	case *ast.LookupExpression:
+		return evaluateLookupExpression(e, scope)
+	case *ast.CallExpression:
+		return evaluateCallExpression(e, scope)
 	}
 
 	return nil, nil
@@ -100,6 +104,8 @@ func evaluateCallExpression(n *ast.CallExpression, scope *definitionScope) (obje
 	switch callee := callee.(type) {
 	case *objects.Function:
 		return evaluateFunctionCall(callee, n.Parameters, scope)
+	case *objects.PredefinedFunction:
+		return evaluatePredefinedFunction(callee, n.Parameters, scope)
 	}
 
 	return nil, objects.OperationNotSupportedError{}
@@ -125,5 +131,18 @@ func evaluateFunctionCall(o *objects.Function, params []ast.Expression, scope *d
 		}
 	}
 
-	return &objects.Nil{}, nil
+	return objects.NilObject, nil
+}
+
+func evaluatePredefinedFunction(o *objects.PredefinedFunction, params []ast.Expression, scope *definitionScope) (objects.Object, error) {
+	parameters := []objects.Object{}
+	for _, p := range params {
+		v, err := evaluateExpression(p, scope)
+		if err != nil {
+			return nil, err
+		}
+		parameters = append(parameters, v)
+	}
+
+	return (*o)(parameters)
 }

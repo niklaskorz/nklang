@@ -527,6 +527,12 @@ func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 		return n, nil
+	case lexer.NilKeyword:
+		n := &ast.Nil{}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
 	}
 
 	return nil, unexpectedToken(s.Token, "one of: (, ID, Integer, String, true, false")

@@ -13,6 +13,7 @@ const (
 	WhileKeyword                  // while
 	TrueKeyword                   // true
 	FalseKeyword                  // false
+	NilKeyword                    // nil
 	DeclarationOperator           // :=
 	AssignmentOperator            // =
 	MulOperator                   // *
