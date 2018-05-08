@@ -69,5 +69,7 @@ faculty = func(n) {
 
 println("9! =", faculty(9));
 
+println((func(x){return x*x;})(2));
+
 name := input("What's your name?");
 println("So your name is", name);
