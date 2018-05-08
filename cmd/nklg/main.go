@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strconv"
@@ -44,6 +45,18 @@ func pfPrintln(params []evaluator.Object) (evaluator.Object, error) {
 	return evaluator.NilObject, nil
 }
 
+func pfInput(params []evaluator.Object) (evaluator.Object, error) {
+	pfPrintln(params)
+
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		return nil, err
+	}
+
+	return &evaluator.String{Value: text}, nil
+}
+
 func main() {
 	f, err := os.Open("example.nk")
 	if err != nil {
@@ -60,14 +73,17 @@ func main() {
 
 	ds := semantics.NewScope()
 	ds.Declare("println")
+	ds.Declare("input")
 	if err := semantics.AnalyzeLookupsWithScope(p, ds); err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	pfPrintln := evaluator.PredefinedFunction(pfPrintln)
+	pfInput := evaluator.PredefinedFunction(pfInput)
 	scope := evaluator.NewScope()
 	scope.Declare("println", pfPrintln)
+	scope.Declare("input", pfInput)
 
 	if err := evaluator.EvaluateWithScope(p, scope); err != nil {
 		fmt.Println(err)

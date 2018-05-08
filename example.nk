@@ -58,3 +58,6 @@ if isLow {
 } else {
     println("It's not low");
 }
+
+name := input("What's your name?");
+println("So your name is", name);
