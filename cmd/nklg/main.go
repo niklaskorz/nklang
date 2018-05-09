@@ -54,7 +54,7 @@ func pfInput(params []evaluator.Object) (evaluator.Object, error) {
 		return nil, err
 	}
 
-	return &evaluator.String{Value: text}, nil
+	return &evaluator.String{Value: text[:len(text)-1]}, nil
 }
 
 func main() {
