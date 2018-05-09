@@ -13,7 +13,7 @@ import (
 	"github.com/niklaskorz/nklang/semantics"
 )
 
-func pfPrintln(params []evaluator.Object) (evaluator.Object, error) {
+func paramsToString(params []evaluator.Object) string {
 	s := ""
 	for i, p := range params {
 		if i != 0 {
@@ -40,13 +40,23 @@ func pfPrintln(params []evaluator.Object) (evaluator.Object, error) {
 			s += "[Object]"
 		}
 	}
+	return s
+}
 
+func pfPrintln(params []evaluator.Object) (evaluator.Object, error) {
+	s := paramsToString(params)
 	fmt.Println(s)
 	return evaluator.NilObject, nil
 }
 
+func pfPrint(params []evaluator.Object) (evaluator.Object, error) {
+	s := paramsToString(params)
+	fmt.Print(s)
+	return evaluator.NilObject, nil
+}
+
 func pfInput(params []evaluator.Object) (evaluator.Object, error) {
-	pfPrintln(params)
+	pfPrint(params)
 
 	reader := bufio.NewReader(os.Stdin)
 	text, err := reader.ReadString('\n')
@@ -78,6 +88,7 @@ func main() {
 
 	ds := semantics.NewScope()
 	ds.Declare("println")
+	ds.Declare("print")
 	ds.Declare("input")
 	if err := semantics.AnalyzeLookupsWithScope(p, ds); err != nil {
 		fmt.Println(err)
@@ -85,9 +96,11 @@ func main() {
 	}
 
 	pfPrintln := evaluator.PredefinedFunction(pfPrintln)
+	pfPrint := evaluator.PredefinedFunction(pfPrint)
 	pfInput := evaluator.PredefinedFunction(pfInput)
 	scope := evaluator.NewScope()
 	scope.Declare("println", pfPrintln)
+	scope.Declare("print", pfPrint)
 	scope.Declare("input", pfInput)
 
 	if err := evaluator.EvaluateWithScope(p, scope); err != nil {
