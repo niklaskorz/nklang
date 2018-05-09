@@ -303,44 +303,50 @@ func (o *Function) Div(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-type PredefinedFunction func(params []Object) (Object, error)
+type PredefinedFunction struct {
+	fn func(params []Object) (Object, error)
+}
 
-func (o PredefinedFunction) IsTrue() bool {
+func WrapFunction(fn func(params []Object) (Object, error)) *PredefinedFunction {
+	return &PredefinedFunction{fn: fn}
+}
+
+func (o *PredefinedFunction) IsTrue() bool {
 	return true
 }
 
-func (o PredefinedFunction) Equals(other Object) (Object, error) {
-	return &Boolean{Value: false}, nil
+func (o *PredefinedFunction) Equals(other Object) (Object, error) {
+	return &Boolean{Value: o == other}, nil
 }
 
-func (o PredefinedFunction) Lt(other Object) (Object, error) {
+func (o *PredefinedFunction) Lt(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-func (o PredefinedFunction) Lte(other Object) (Object, error) {
+func (o *PredefinedFunction) Lte(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-func (o PredefinedFunction) Gt(other Object) (Object, error) {
+func (o *PredefinedFunction) Gt(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-func (o PredefinedFunction) Gte(other Object) (Object, error) {
+func (o *PredefinedFunction) Gte(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-func (o PredefinedFunction) Add(other Object) (Object, error) {
+func (o *PredefinedFunction) Add(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-func (o PredefinedFunction) Sub(other Object) (Object, error) {
+func (o *PredefinedFunction) Sub(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-func (o PredefinedFunction) Mul(other Object) (Object, error) {
+func (o *PredefinedFunction) Mul(other Object) (Object, error) {
 	return nil, operationNotSupported
 }
 
-func (o PredefinedFunction) Div(other Object) (Object, error) {
+func (o *PredefinedFunction) Div(other Object) (Object, error) {
 	return nil, operationNotSupported
 }

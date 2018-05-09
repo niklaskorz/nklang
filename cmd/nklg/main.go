@@ -95,9 +95,9 @@ func main() {
 		return
 	}
 
-	pfPrintln := evaluator.PredefinedFunction(pfPrintln)
-	pfPrint := evaluator.PredefinedFunction(pfPrint)
-	pfInput := evaluator.PredefinedFunction(pfInput)
+	pfPrintln := evaluator.WrapFunction(pfPrintln)
+	pfPrint := evaluator.WrapFunction(pfPrint)
+	pfInput := evaluator.WrapFunction(pfInput)
 	scope := evaluator.NewScope()
 	scope.Declare("println", pfPrintln)
 	scope.Declare("print", pfPrint)

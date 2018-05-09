@@ -103,7 +103,7 @@ func evaluateCallExpression(n *ast.CallExpression, scope *definitionScope) (Obje
 	switch callee := callee.(type) {
 	case *Function:
 		return evaluateFunctionCall(callee, n.Parameters, scope)
-	case PredefinedFunction:
+	case *PredefinedFunction:
 		return evaluatePredefinedFunctionCall(callee, n.Parameters, scope)
 	}
 
@@ -133,7 +133,7 @@ func evaluateFunctionCall(o *Function, params []ast.Expression, scope *definitio
 	return NilObject, nil
 }
 
-func evaluatePredefinedFunctionCall(o PredefinedFunction, params []ast.Expression, scope *definitionScope) (Object, error) {
+func evaluatePredefinedFunctionCall(o *PredefinedFunction, params []ast.Expression, scope *definitionScope) (Object, error) {
 	parameters := []Object{}
 	for _, p := range params {
 		v, err := evaluateExpression(p, scope)
@@ -143,5 +143,5 @@ func evaluatePredefinedFunctionCall(o PredefinedFunction, params []ast.Expressio
 		parameters = append(parameters, v)
 	}
 
-	return o(parameters)
+	return o.fn(parameters)
 }
