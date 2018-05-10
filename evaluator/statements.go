@@ -64,7 +64,14 @@ func evaluateWhileStatement(n *ast.WhileStatement, scope *definitionScope) error
 		}
 
 		if err := evaluateStatements(n.Statements, scope.newScope()); err != nil {
-			return err
+			switch err := err.(type) {
+			case *continueError:
+				continue
+			case *breakError:
+				return nil
+			default:
+				return err
+			}
 		}
 	}
 }
@@ -92,14 +99,6 @@ func evaluateAssignmentStatement(n *ast.AssignmentStatement, scope *definitionSc
 	return nil
 }
 
-type returnError struct {
-	value Object
-}
-
-func (r *returnError) Error() string {
-	return "Unexpected return statement"
-}
-
 func evaluateReturnStatement(n *ast.ReturnStatement, scope *definitionScope) error {
 	value, err := evaluateExpression(n.Expression, scope)
 	if err != nil {
@@ -109,9 +108,9 @@ func evaluateReturnStatement(n *ast.ReturnStatement, scope *definitionScope) err
 }
 
 func evaluateContinueStatement(n *ast.ContinueStatement, scope *definitionScope) error {
-	return nil
+	return &continueError{}
 }
 
 func evaluateBreakStatement(n *ast.BreakStatement, scope *definitionScope) error {
-	return nil
+	return &breakError{}
 }

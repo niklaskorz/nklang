@@ -125,6 +125,10 @@ func evaluateFunctionCall(o *Function, params []ast.Expression, scope *definitio
 		switch err := err.(type) {
 		case *returnError:
 			return err.value, nil
+		case *continueError:
+			return nil, err.syntaxError()
+		case *breakError:
+			return nil, err.syntaxError()
 		default:
 			return nil, err
 		}
