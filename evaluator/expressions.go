@@ -1,8 +1,6 @@
 package evaluator
 
 import (
-	"fmt"
-
 	"github.com/niklaskorz/nklang/ast"
 )
 
@@ -20,6 +18,8 @@ func evaluateExpression(n ast.Expression, scope *definitionScope) (Object, error
 		return evaluateIfExpression(e, scope)
 	case *ast.BinaryOperationExpression:
 		return evaluateBinaryExpression(e, scope)
+	case *ast.UnaryOperationExpression:
+		return evaluateUnaryExpression(e, scope)
 	case *ast.LookupExpression:
 		return evaluateLookupExpression(e, scope)
 	case *ast.CallExpression:
@@ -59,6 +59,12 @@ func evaluateBinaryExpression(n *ast.BinaryOperationExpression, scope *definitio
 	switch n.Operator {
 	case ast.BinaryOperatorEq:
 		return aValue.Equals(bValue)
+	case ast.BinaryOperatorNe:
+		o, err := aValue.Equals(bValue)
+		if err != nil {
+			return nil, err
+		}
+		return &Boolean{Value: !o.Value}, nil
 	case ast.BinaryOperatorLt:
 		return aValue.Lt(bValue)
 	case ast.BinaryOperatorLe:
@@ -87,7 +93,29 @@ func evaluateBinaryExpression(n *ast.BinaryOperationExpression, scope *definitio
 		return bValue, nil
 	}
 
-	return nil, fmt.Errorf("Unknown binary expression")
+	return nil, operationNotSupported
+}
+
+func evaluateUnaryExpression(n *ast.UnaryOperationExpression, scope *definitionScope) (Object, error) {
+	value, err := evaluateExpression(n.A, scope)
+	if err != nil {
+		return nil, err
+	}
+
+	switch n.Operator {
+	case ast.UnaryOperatorLnot:
+		return &Boolean{Value: !value.IsTrue()}, nil
+	case ast.UnaryOperatorPos:
+		if value, ok := value.(ObjectWithPos); ok {
+			return value.Pos()
+		}
+	case ast.UnaryOperatorNeg:
+		if value, ok := value.(ObjectWithNeg); ok {
+			return value.Neg()
+		}
+	}
+
+	return nil, operationNotSupported
 }
 
 func evaluateLookupExpression(n *ast.LookupExpression, scope *definitionScope) (Object, error) {

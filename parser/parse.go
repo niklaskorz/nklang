@@ -384,6 +384,8 @@ func parseComparison(s *lexer.Scanner) (ast.Expression, error) {
 	switch s.Token.Type {
 	case lexer.EqOperator:
 		op = ast.BinaryOperatorEq
+	case lexer.NeOperator:
+		op = ast.BinaryOperatorNe
 	case lexer.LtOperator:
 		op = ast.BinaryOperatorLt
 	case lexer.LeOperator:
@@ -420,13 +422,18 @@ func parseTerm(s *lexer.Scanner) (ast.Expression, error) {
 		return nil, err
 	}
 
-	for s.Token.Type == lexer.AddOperator || s.Token.Type == lexer.SubOperator {
+L:
+	for {
 		var op ast.BinaryOperator
-		if s.Token.Type == lexer.AddOperator {
+		switch s.Token.Type {
+		case lexer.Plus:
 			op = ast.BinaryOperatorAdd
-		} else {
+		case lexer.Minus:
 			op = ast.BinaryOperatorSub
+		default:
+			break L
 		}
+
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -448,13 +455,18 @@ func parseAddend(s *lexer.Scanner) (ast.Expression, error) {
 		return nil, err
 	}
 
-	for s.Token.Type == lexer.MulOperator || s.Token.Type == lexer.DivOperator {
+L:
+	for {
 		var op ast.BinaryOperator
-		if s.Token.Type == lexer.MulOperator {
+		switch s.Token.Type {
+		case lexer.MulOperator:
 			op = ast.BinaryOperatorMul
-		} else {
+		case lexer.DivOperator:
 			op = ast.BinaryOperatorDiv
+		default:
+			break L
 		}
+
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -471,6 +483,45 @@ func parseAddend(s *lexer.Scanner) (ast.Expression, error) {
 }
 
 func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
+	var e *ast.UnaryOperationExpression
+L:
+	for {
+		var op ast.UnaryOperator
+		switch s.Token.Type {
+		case lexer.LogicalNot:
+			op = ast.UnaryOperatorLnot
+		case lexer.Plus:
+			op = ast.UnaryOperatorPos
+		case lexer.Minus:
+			op = ast.UnaryOperatorNeg
+		default:
+			break L
+		}
+
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+
+		operation := &ast.UnaryOperationExpression{Operator: op}
+		if e != nil {
+			e.A = operation
+		}
+		e = operation
+	}
+
+	v, err := parseValue(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if e != nil {
+		e.A = v
+		return e, nil
+	}
+	return v, nil
+}
+
+func parseValue(s *lexer.Scanner) (ast.Expression, error) {
 	switch s.Token.Type {
 	case lexer.LeftParen:
 		if err := s.ReadNext(); err != nil {

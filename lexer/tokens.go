@@ -18,11 +18,13 @@ const (
 	AssignmentOperator            // =
 	MulOperator                   // *
 	DivOperator                   // /
-	AddOperator                   // +
-	SubOperator                   // -
+	Plus                          // +
+	Minus                         // -
+	LogicalNot                    // !
 	LogicalOr                     // ||
 	LogicalAnd                    // &&
 	EqOperator                    // ==
+	NeOperator                    // !=
 	LtOperator                    // <
 	LeOperator                    // <=
 	GtOperator                    // >

@@ -4,15 +4,23 @@ import "github.com/niklaskorz/nklang/ast"
 
 type Object interface {
 	IsTrue() bool
-	Equals(other Object) (Object, error)
-	Lt(other Object) (Object, error)
-	Lte(other Object) (Object, error)
-	Gt(other Object) (Object, error)
-	Gte(other Object) (Object, error)
+	Equals(other Object) (*Boolean, error)
+	Lt(other Object) (*Boolean, error)
+	Lte(other Object) (*Boolean, error)
+	Gt(other Object) (*Boolean, error)
+	Gte(other Object) (*Boolean, error)
 	Add(other Object) (Object, error)
 	Sub(other Object) (Object, error)
 	Mul(other Object) (Object, error)
 	Div(other Object) (Object, error)
+}
+
+type ObjectWithPos interface {
+	Pos() (Object, error)
+}
+
+type ObjectWithNeg interface {
+	Neg() (Object, error)
 }
 
 type OperationNotSupportedError struct{}
@@ -29,7 +37,7 @@ func (o *String) IsTrue() bool {
 	return o.Value != ""
 }
 
-func (o *String) Equals(other Object) (Object, error) {
+func (o *String) Equals(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *String:
 		return &Boolean{Value: o.Value == other.Value}, nil
@@ -38,19 +46,19 @@ func (o *String) Equals(other Object) (Object, error) {
 	}
 }
 
-func (o *String) Lt(other Object) (Object, error) {
+func (o *String) Lt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *String) Lte(other Object) (Object, error) {
+func (o *String) Lte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *String) Gt(other Object) (Object, error) {
+func (o *String) Gt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *String) Gte(other Object) (Object, error) {
+func (o *String) Gte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
@@ -81,7 +89,7 @@ func (o *Integer) IsTrue() bool {
 	return o.Value != 0
 }
 
-func (o *Integer) Equals(other Object) (Object, error) {
+func (o *Integer) Equals(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value == other.Value}, nil
@@ -90,7 +98,7 @@ func (o *Integer) Equals(other Object) (Object, error) {
 	}
 }
 
-func (o *Integer) Lt(other Object) (Object, error) {
+func (o *Integer) Lt(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value < other.Value}, nil
@@ -99,7 +107,7 @@ func (o *Integer) Lt(other Object) (Object, error) {
 	}
 }
 
-func (o *Integer) Lte(other Object) (Object, error) {
+func (o *Integer) Lte(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value <= other.Value}, nil
@@ -108,7 +116,7 @@ func (o *Integer) Lte(other Object) (Object, error) {
 	}
 }
 
-func (o *Integer) Gt(other Object) (Object, error) {
+func (o *Integer) Gt(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value > other.Value}, nil
@@ -117,7 +125,7 @@ func (o *Integer) Gt(other Object) (Object, error) {
 	}
 }
 
-func (o *Integer) Gte(other Object) (Object, error) {
+func (o *Integer) Gte(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value >= other.Value}, nil
@@ -162,13 +170,21 @@ func (o *Integer) Div(other Object) (Object, error) {
 	}
 }
 
+func (o *Integer) Pos() (Object, error) {
+	return o, nil
+}
+
+func (o *Integer) Neg() (Object, error) {
+	return &Integer{Value: -o.Value}, nil
+}
+
 type Boolean ast.Boolean
 
 func (o *Boolean) IsTrue() bool {
 	return o.Value
 }
 
-func (o *Boolean) Equals(other Object) (Object, error) {
+func (o *Boolean) Equals(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Boolean:
 		return &Boolean{Value: o.Value == other.Value}, nil
@@ -177,19 +193,19 @@ func (o *Boolean) Equals(other Object) (Object, error) {
 	}
 }
 
-func (o *Boolean) Lt(other Object) (Object, error) {
+func (o *Boolean) Lt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Boolean) Lte(other Object) (Object, error) {
+func (o *Boolean) Lte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Boolean) Gt(other Object) (Object, error) {
+func (o *Boolean) Gt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Boolean) Gte(other Object) (Object, error) {
+func (o *Boolean) Gte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
@@ -217,7 +233,7 @@ func (o *Nil) IsTrue() bool {
 	return false
 }
 
-func (o *Nil) Equals(other Object) (Object, error) {
+func (o *Nil) Equals(other Object) (*Boolean, error) {
 	switch other.(type) {
 	case *Nil:
 		return &Boolean{Value: true}, nil
@@ -226,19 +242,19 @@ func (o *Nil) Equals(other Object) (Object, error) {
 	}
 }
 
-func (o *Nil) Lt(other Object) (Object, error) {
+func (o *Nil) Lt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Nil) Lte(other Object) (Object, error) {
+func (o *Nil) Lte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Nil) Gt(other Object) (Object, error) {
+func (o *Nil) Gt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Nil) Gte(other Object) (Object, error) {
+func (o *Nil) Gte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
@@ -267,23 +283,23 @@ func (o *Function) IsTrue() bool {
 	return true
 }
 
-func (o *Function) Equals(other Object) (Object, error) {
+func (o *Function) Equals(other Object) (*Boolean, error) {
 	return &Boolean{Value: o == other}, nil
 }
 
-func (o *Function) Lt(other Object) (Object, error) {
+func (o *Function) Lt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Function) Lte(other Object) (Object, error) {
+func (o *Function) Lte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Function) Gt(other Object) (Object, error) {
+func (o *Function) Gt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *Function) Gte(other Object) (Object, error) {
+func (o *Function) Gte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
@@ -315,23 +331,23 @@ func (o *PredefinedFunction) IsTrue() bool {
 	return true
 }
 
-func (o *PredefinedFunction) Equals(other Object) (Object, error) {
+func (o *PredefinedFunction) Equals(other Object) (*Boolean, error) {
 	return &Boolean{Value: o == other}, nil
 }
 
-func (o *PredefinedFunction) Lt(other Object) (Object, error) {
+func (o *PredefinedFunction) Lt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *PredefinedFunction) Lte(other Object) (Object, error) {
+func (o *PredefinedFunction) Lte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *PredefinedFunction) Gt(other Object) (Object, error) {
+func (o *PredefinedFunction) Gt(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 
-func (o *PredefinedFunction) Gte(other Object) (Object, error) {
+func (o *PredefinedFunction) Gte(other Object) (*Boolean, error) {
 	return nil, operationNotSupported
 }
 

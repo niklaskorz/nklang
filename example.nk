@@ -10,11 +10,16 @@ mul := func(a) {
 };
 
 test := func(f) {
-    x := 42;
+    x := +42;
     return f(x);
 };
 
-println(test(mul(2)));
+p := false;
+if !p {
+    println("p is false");
+}
+
+println(test(mul(-2)));
 
 println(add);
 println(add(50, 30));

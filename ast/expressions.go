@@ -20,6 +20,7 @@ type BinaryOperator int
 
 const (
 	BinaryOperatorEq BinaryOperator = iota
+	BinaryOperatorNe
 	BinaryOperatorLt
 	BinaryOperatorLe
 	BinaryOperatorGt
@@ -40,6 +41,23 @@ type BinaryOperationExpression struct {
 
 func (n *BinaryOperationExpression) String() string {
 	return fmt.Sprintf("BinaryOperationExpression{Operator: %d, A: %s, B: %s}", n.Operator, n.A, n.B)
+}
+
+type UnaryOperator int
+
+const (
+	UnaryOperatorLnot UnaryOperator = iota
+	UnaryOperatorPos
+	UnaryOperatorNeg
+)
+
+type UnaryOperationExpression struct {
+	Operator UnaryOperator
+	A        Expression
+}
+
+func (n *UnaryOperationExpression) String() string {
+	return fmt.Sprintf("UnaryOperationExpression{Operator: %d, A: %s}", n.Operator, n.A)
 }
 
 type LookupExpression struct {

@@ -188,6 +188,23 @@ func (s *Scanner) readNext() error {
 		return nil
 	}
 
+	if r == '!' {
+		r, err := s.readRune()
+		if err != nil {
+			return err
+		}
+
+		if r == '=' {
+			s.Token = &Token{Line: line, Column: column, Type: NeOperator, Value: "!="}
+		} else {
+			if err := s.unreadRune(); err != nil {
+				return err
+			}
+			s.Token = &Token{Line: line, Column: column, Type: LogicalNot, Value: "!"}
+		}
+		return nil
+	}
+
 	if r == '<' {
 		r, err := s.readRune()
 		if err != nil {
@@ -257,12 +274,12 @@ func (s *Scanner) readNext() error {
 	}
 
 	if r == '+' {
-		s.Token = &Token{Line: line, Column: column, Type: AddOperator, Value: "+"}
+		s.Token = &Token{Line: line, Column: column, Type: Plus, Value: "+"}
 		return nil
 	}
 
 	if r == '-' {
-		s.Token = &Token{Line: line, Column: column, Type: SubOperator, Value: "-"}
+		s.Token = &Token{Line: line, Column: column, Type: Minus, Value: "-"}
 		return nil
 	}
 

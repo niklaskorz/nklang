@@ -28,13 +28,15 @@ l_or = l_and { "||" l_and } ;
 
 l_and = comp { "&&" comp } ;
 
-comp = term [ ("==" | ">" | ">=" | "<" | "<=") term ] ;
+comp = term [ ("==" | "!=" | ">" | ">=" | "<" | "<=") term ] ;
 
 term = addend { ("+" | "-") addend } ;
 
 addend = factor { ("*" | "/") factor } ;
 
-factor = "(" expr ")" [ call ]
+factor = { prefix_op } value;
+
+value = "(" expr ")" [ call ]
        | ID [ call ]
        | NUM
        | STR
@@ -44,3 +46,5 @@ factor = "(" expr ")" [ call ]
        ;
 
 call = "(" [ expr { "," expr } ] ")" ;
+
+prefix_op = "!" | "+" | "-";
