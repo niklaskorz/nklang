@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -15,15 +16,15 @@ func main() {
 	log.Println("Generating code...")
 
 	i32 := types.I32
-	a := constant.NewInt(5, i32)
-	b := constant.NewInt(13, i32)
-	zero := constant.NewInt(0, i32)
+	a := constant.NewInt(i32, 5)
+	b := constant.NewInt(i32, 13)
+	zero := constant.NewInt(i32, 0)
 
 	m := ir.NewModule()
 
-	putchar := m.NewFunction("putchar", i32, ir.NewParam("c", i32))
+	putchar := m.NewFunc("putchar", i32, ir.NewParam("c", i32))
 
-	main := m.NewFunction("main", i32)
+	main := m.NewFunc("main", i32)
 	entry := main.NewBlock("")
 
 	tmp1 := entry.NewMul(a, b)
@@ -31,14 +32,8 @@ func main() {
 
 	entry.NewRet(zero)
 
-	f, err := os.OpenFile("rand.ll", os.O_WRONLY|os.O_CREATE, 0755)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if _, err := f.WriteString(m.String()); err != nil {
-		log.Fatal(err)
-	}
-	if err := f.Close(); err != nil {
+	data := []byte(m.String())
+	if err := ioutil.WriteFile("rand.ll", data, 0644); err != nil {
 		log.Fatal(err)
 	}
 
