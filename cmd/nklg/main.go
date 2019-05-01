@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/niklaskorz/nklang/evaluator"
-
 	"github.com/niklaskorz/nklang/lexer"
 	"github.com/niklaskorz/nklang/parser"
 	"github.com/niklaskorz/nklang/semantics"
@@ -33,7 +35,14 @@ func paramsToString(params []evaluator.Object) string {
 		case *evaluator.Nil:
 			s += "nil"
 		case *evaluator.Function:
-			s += "[Function]"
+			s += "func("
+			for j, param := range p.Function.Parameters {
+				if j != 0 {
+					s += ", "
+				}
+				s += param
+			}
+			s += ")"
 		case *evaluator.PredefinedFunction:
 			s += "[PredefinedFunction]"
 		default:
@@ -67,6 +76,31 @@ func pfInput(params []evaluator.Object) (evaluator.Object, error) {
 	return &evaluator.String{Value: text[:len(text)-1]}, nil
 }
 
+func pfEval(params []evaluator.Object) (evaluator.Object, error) {
+	src := paramsToString(params)
+
+	s := lexer.NewScanner(strings.NewReader(src))
+	if err := s.ReadNext(); err != nil {
+		return evaluator.NilObject, errors.Wrap(err, "Scanning eval string failed")
+	}
+
+	expr, err := parser.ParseExpression(s)
+	if err != nil {
+		return evaluator.NilObject, errors.Wrap(err, "Parsing eval string failed")
+	}
+
+	if err := semantics.AnalyzeExpression(semantics.NewScope(), expr); err != nil {
+		return evaluator.NilObject, errors.Wrap(err, "Analyzing eval string failed")
+	}
+
+	result, err := evaluator.EvaluateExpression(expr, evaluator.NewScope())
+	if err != nil {
+		return evaluator.NilObject, errors.Wrap(err, "Evaluating eval string failed")
+	}
+
+	return result, nil
+}
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage:", os.Args[0], "<source file>")
@@ -90,6 +124,7 @@ func main() {
 	ds.Declare("println")
 	ds.Declare("print")
 	ds.Declare("input")
+	ds.Declare("eval")
 	if err := semantics.AnalyzeLookupsWithScope(p, ds); err != nil {
 		fmt.Println(err)
 		return
@@ -98,10 +133,12 @@ func main() {
 	pfPrintln := evaluator.WrapFunction(pfPrintln)
 	pfPrint := evaluator.WrapFunction(pfPrint)
 	pfInput := evaluator.WrapFunction(pfInput)
+	pfEval := evaluator.WrapFunction(pfEval)
 	scope := evaluator.NewScope()
 	scope.Declare("println", pfPrintln)
 	scope.Declare("print", pfPrint)
 	scope.Declare("input", pfInput)
+	scope.Declare("eval", pfEval)
 
 	if err := evaluator.EvaluateWithScope(p, scope); err != nil {
 		fmt.Println(err)

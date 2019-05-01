@@ -624,3 +624,8 @@ func parseCall(callee ast.Expression, s *lexer.Scanner) (ast.Expression, error) 
 
 	return &ast.CallExpression{Callee: callee, Parameters: parameters}, nil
 }
+
+// For reuse
+func ParseExpression(s *lexer.Scanner) (ast.Expression, error) {
+	return parseExpression(s)
+}

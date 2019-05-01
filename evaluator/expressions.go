@@ -177,3 +177,7 @@ func evaluatePredefinedFunctionCall(o *PredefinedFunction, params []ast.Expressi
 
 	return o.fn(parameters)
 }
+
+func EvaluateExpression(n ast.Expression, scope *definitionScope) (Object, error) {
+	return evaluateExpression(n, scope)
+}

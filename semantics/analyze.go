@@ -133,3 +133,7 @@ func analyzeExpression(scope *definitionScope, n ast.Expression) error {
 
 	return nil
 }
+
+func AnalyzeExpression(scope *definitionScope, n ast.Expression) error {
+	return analyzeExpression(scope, n)
+}

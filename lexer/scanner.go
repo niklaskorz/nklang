@@ -8,17 +8,19 @@ import (
 )
 
 const bufferSize = 32
+const eofRune = -1
 
 type Scanner struct {
 	rd            *bufio.Reader
 	line, column  int
+	eof           bool
 	Token         *Token
 	previousToken *Token
 	nextToken     *Token
 }
 
 func NewScanner(rd io.Reader) *Scanner {
-	return &Scanner{rd: bufio.NewReader(rd), line: 1, column: 0}
+	return &Scanner{rd: bufio.NewReader(rd), line: 1, column: 0, eof: false}
 }
 
 func (s *Scanner) Unread() error {
@@ -49,9 +51,17 @@ func (s *Scanner) ReadNext() error {
 }
 
 func (s *Scanner) readRune() (rune, error) {
+	if s.eof {
+		return eofRune, nil
+	}
+
 	r, _, err := s.rd.ReadRune()
 	if err != nil {
-		return 0, err
+		if err != io.EOF {
+			return 0, err
+		}
+		r = eofRune
+		s.eof = true
 	}
 
 	s.column++
@@ -59,6 +69,9 @@ func (s *Scanner) readRune() (rune, error) {
 }
 
 func (s *Scanner) unreadRune() error {
+	if s.eof {
+		return nil
+	}
 	if s.column == 0 {
 		return fmt.Errorf("Cannot unread rune after line break")
 	}
@@ -75,6 +88,10 @@ func (s *Scanner) readNext() error {
 		r, err = s.readRune()
 		if err != nil {
 			return err
+		}
+
+		if r == eofRune {
+			return io.EOF
 		}
 
 		if !unicode.IsSpace(r) {

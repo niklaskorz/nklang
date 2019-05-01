@@ -86,5 +86,20 @@ while i < 5 {
     println(i);
 }
 
+println(5/2);
+
+powMaker := func(t) {
+    src := "func(a) { return 1";
+    i := 0;
+    while i < t {
+        i = i + 1;
+        src = src + "* a";
+    }
+    src = src + "; }";
+    return eval(src);
+};
+pow6 := powMaker(6);
+println(pow6(3));
+
 name := input("What's your name? ");
 println("So your name is", name);

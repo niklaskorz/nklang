@@ -37,7 +37,7 @@ const (
 	RightBrace                    // }
 	LeftBracket                   // [
 	RightBracket                  // ]
-	ID                            // Unicode letter followed by unicde letters or digits
+	ID                            // Unicode letter followed by unicode letters or digits
 	Integer                       // Digits
 	Float
 	String // Arbitrary characters enclosed by quotation marks
