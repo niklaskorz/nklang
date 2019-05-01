@@ -88,18 +88,19 @@ while i < 5 {
 
 println(5/2);
 
-powMaker := func(t) {
+pow := func(t) {
     src := "func(a) { return 1";
     i := 0;
     while i < t {
         i = i + 1;
-        src = src + "* a";
+        src = src + " * a";
     }
     src = src + "; }";
+    println(src);
     return eval(src);
 };
-pow6 := powMaker(6);
-println(pow6(3));
+pow6 := pow(6);
+println("pow(6)(3):", pow6(3));
 
 name := input("What's your name? ");
 println("So your name is", name);
