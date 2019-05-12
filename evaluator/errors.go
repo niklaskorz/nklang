@@ -39,3 +39,11 @@ func (e *breakError) Error() string {
 func (e *breakError) syntaxError() *syntaxError {
 	return newSyntaxError(e.Error())
 }
+
+type OperationNotSupportedError struct{}
+
+func (e OperationNotSupportedError) Error() string {
+	return "Operation not supported"
+}
+
+var operationNotSupported = OperationNotSupportedError{}

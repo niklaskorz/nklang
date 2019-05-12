@@ -66,21 +66,37 @@ func evaluateBinaryExpression(n *ast.BinaryOperationExpression, scope *definitio
 		}
 		return &Boolean{Value: !o.Value}, nil
 	case ast.BinaryOperatorLt:
-		return aValue.Lt(bValue)
+		if v, ok := aValue.(Comparable); ok {
+			return v.Lt(bValue)
+		}
 	case ast.BinaryOperatorLe:
-		return aValue.Lte(bValue)
+		if v, ok := aValue.(Comparable); ok {
+			return v.Lte(bValue)
+		}
 	case ast.BinaryOperatorGt:
-		return aValue.Gt(bValue)
+		if v, ok := aValue.(Comparable); ok {
+			return v.Gt(bValue)
+		}
 	case ast.BinaryOperatorGe:
-		return aValue.Gte(bValue)
+		if v, ok := aValue.(Comparable); ok {
+			return v.Gte(bValue)
+		}
 	case ast.BinaryOperatorAdd:
-		return aValue.Add(bValue)
+		if v, ok := aValue.(Addable); ok {
+			return v.Add(bValue)
+		}
 	case ast.BinaryOperatorSub:
-		return aValue.Sub(bValue)
+		if v, ok := aValue.(Subtractable); ok {
+			return v.Sub(bValue)
+		}
 	case ast.BinaryOperatorMul:
-		return aValue.Mul(bValue)
+		if v, ok := aValue.(Multipliable); ok {
+			return v.Mul(bValue)
+		}
 	case ast.BinaryOperatorDiv:
-		return aValue.Div(bValue)
+		if v, ok := aValue.(Dividable); ok {
+			return v.Div(bValue)
+		}
 	case ast.BinaryOperatorLand:
 		if !aValue.IsTrue() {
 			return aValue, nil
