@@ -2,11 +2,9 @@ stmts = { stmt } ;
 
 stmt = if_stmt
      | while_stmt
-     | "continue" ";"
-     | "break" ";"
      | ID ( ":=" | "=" ) expr ";"
-     | "return" [ expr ] ";"
-     | [ expr ] ";"
+     | ("continue" | "break") ";"
+     | [ "return" ] [ expr ] ";"
      ;
 
 if_stmt = "if" expr "{" stmts "}" [ if_stmt_else ] ;
@@ -19,7 +17,7 @@ expr = if_expr
      | l_or
      ;
 
-if_expr = "if" expr "{" expr "}" if_expr_else ;
+if_expr = "if" expr "{" expr "}" [ if_expr_else ] ;
 if_expr_else = "else" (if_expr | "{" expr "}") ;
 
 function = "func" "(" [ ID { "," ID } ] ")" "{" stmts "}" ;
@@ -34,17 +32,20 @@ term = addend { ("+" | "-") addend } ;
 
 addend = factor { ("*" | "/") factor } ;
 
-factor = { prefix_op } value;
-
-value = "(" expr ")" [ call ]
-       | ID [ call ]
-       | NUM
-       | STR
-       | "true"
-       | "false"
-       | "nil"
-       ;
-
-call = "(" [ expr { "," expr } ] ")" ;
+factor = { prefix_op } value { suffix_op } ;
 
 prefix_op = "!" | "+" | "-";
+
+suffix_op = "(" [ expr { "," expr } ] ")"
+          | "[" expr "]"
+          ;
+
+value = "(" expr ")"
+      | "[" [ expr { "," expr } ] "]"
+      | ID
+      | NUM
+      | STR
+      | "true"
+      | "false"
+      | "nil"
+      ;
