@@ -75,5 +75,14 @@ type CallExpression struct {
 }
 
 func (n *CallExpression) String() string {
-	return fmt.Sprintf("CallExpresion{Callee: %s, Parameters: %d}", n.Callee, n.Parameters)
+	return fmt.Sprintf("CallExpresion{Callee: %s, Parameters: %v}", n.Callee, n.Parameters)
+}
+
+type SubscriptExpression struct {
+	Target Expression
+	Index  Expression
+}
+
+func (n *SubscriptExpression) String() string {
+	return fmt.Sprintf("SubscriptExpression{Target: %s, Index: %s}", n.Target, n.Index)
 }

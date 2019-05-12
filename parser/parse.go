@@ -2,6 +2,7 @@ package parser
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/niklaskorz/nklang/ast"
 	"github.com/niklaskorz/nklang/lexer"
@@ -483,7 +484,7 @@ L:
 }
 
 func parseFactor(s *lexer.Scanner) (ast.Expression, error) {
-	var e *ast.UnaryOperationExpression
+	var prefixOp *ast.UnaryOperationExpression
 L:
 	for {
 		var op ast.UnaryOperator
@@ -503,10 +504,10 @@ L:
 		}
 
 		operation := &ast.UnaryOperationExpression{Operator: op}
-		if e != nil {
-			e.A = operation
+		if prefixOp != nil {
+			prefixOp.A = operation
 		}
-		e = operation
+		prefixOp = operation
 	}
 
 	v, err := parseValue(s)
@@ -514,9 +515,27 @@ L:
 		return nil, err
 	}
 
-	if e != nil {
-		e.A = v
-		return e, nil
+	for {
+		if s.Token.Type == lexer.LeftParen {
+			e, err := parseCall(v, s)
+			if err != nil {
+				return nil, err
+			}
+			v = e
+		} else if s.Token.Type == lexer.LeftBracket {
+			e, err := parseSubscript(v, s)
+			if err != nil {
+				return nil, err
+			}
+			v = e
+		} else {
+			break
+		}
+	}
+
+	if prefixOp != nil {
+		prefixOp.A = v
+		return prefixOp, nil
 	}
 	return v, nil
 }
@@ -537,25 +556,31 @@ func parseValue(s *lexer.Scanner) (ast.Expression, error) {
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
-		if s.Token.Type == lexer.LeftParen {
-			return parseCall(n, s)
-		}
 		return n, nil
 	case lexer.ID:
 		n := &ast.LookupExpression{Identifier: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
-		if s.Token.Type == lexer.LeftParen {
-			return parseCall(n, s)
-		}
 		return n, nil
 	case lexer.Integer:
-		num, err := strconv.ParseInt(s.Token.Value, 10, 64)
+		value := strings.ReplaceAll(s.Token.Value, "_", "")
+		num, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			return nil, err
 		}
 		n := &ast.Integer{Value: num}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+		return n, nil
+	case lexer.Float:
+		value := strings.ReplaceAll(s.Token.Value, "_", "")
+		num, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return nil, err
+		}
+		n := &ast.Float{Value: num}
 		if err := s.ReadNext(); err != nil {
 			return nil, err
 		}
@@ -623,6 +648,31 @@ func parseCall(callee ast.Expression, s *lexer.Scanner) (ast.Expression, error) 
 	}
 
 	return &ast.CallExpression{Callee: callee, Parameters: parameters}, nil
+}
+
+func parseSubscript(target ast.Expression, s *lexer.Scanner) (ast.Expression, error) {
+	if s.Token.Type != lexer.LeftBracket {
+		return nil, unexpectedToken(s.Token, "[")
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	index, err := parseExpression(s)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	if s.Token.Type != lexer.RightBracket {
+		return nil, unexpectedToken(s.Token, "]")
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+	return &ast.SubscriptExpression{Target: target, Index: index}, nil
 }
 
 // For reuse

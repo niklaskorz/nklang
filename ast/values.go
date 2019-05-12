@@ -31,6 +31,18 @@ func (n *Integer) IsTrue() bool {
 	return n.Value != 0
 }
 
+type Float struct {
+	Value float64
+}
+
+func (n *Float) String() string {
+	return fmt.Sprintf("Float{Value: %f}", n.Value)
+}
+
+func (n *Float) IsTrue() bool {
+	return n.Value != 0.0
+}
+
 type String struct {
 	Value string
 }
