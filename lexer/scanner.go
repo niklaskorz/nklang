@@ -123,6 +123,9 @@ func (s *Scanner) readNext() error {
 	if r == '"' {
 		// String
 		v, err := s.scanString()
+		if err == io.EOF {
+			return fmt.Errorf("Unexpected end of file while parsing string literal")
+		}
 		if err != nil {
 			return err
 		}
@@ -191,7 +194,7 @@ func (s *Scanner) readNext() error {
 			}
 			num += "." + string(r) + v
 			s.Token = &Token{Line: line, Column: column, Type: Float, Value: num}
-			
+
 		} else {
 			// Integer
 			if err := s.unreadRune(); err != nil {
