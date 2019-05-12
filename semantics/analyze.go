@@ -129,6 +129,12 @@ func analyzeExpression(scope *DefinitionScope, n ast.Expression) error {
 				return err
 			}
 		}
+	case *ast.ArrayExpression:
+		for _, item := range e.Items {
+			if err := analyzeExpression(scope, item); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

@@ -1,6 +1,10 @@
 package evaluator
 
-import "github.com/niklaskorz/nklang/ast"
+import (
+	"fmt"
+
+	"github.com/niklaskorz/nklang/ast"
+)
 
 type Object interface {
 	IsTrue() bool
@@ -38,8 +42,48 @@ type Dividable interface {
 	Div(other Object) (Object, error)
 }
 
-type Callable interface {
-	Call()
+type Subscriptable interface {
+	Subscript(other Object) (Object, error)
+}
+
+type Array struct {
+	Items []Object
+}
+
+func (o *Array) IsTrue() bool {
+	return len(o.Items) > 0
+}
+
+func (o *Array) Equals(other Object) (*Boolean, error) {
+	switch other := other.(type) {
+	case *Array:
+		if len(o.Items) != len(other.Items) {
+			return &Boolean{Value: false}, nil
+		}
+		for i, item := range o.Items {
+			if item != other.Items[i] {
+				return &Boolean{Value: false}, nil
+			}
+		}
+		return &Boolean{Value: true}, nil
+	}
+	return &Boolean{Value: false}, nil
+}
+
+func (o *Array) Subscript(other Object) (Object, error) {
+	switch other := other.(type) {
+	case *Integer:
+		i := other.Value
+		l := int64(len(o.Items))
+		if i < 0 {
+			i = l + i
+		}
+		if i < 0 || i >= l {
+			return nil, fmt.Errorf("Index %d out of bounds", other.Value)
+		}
+		return o.Items[i], nil
+	}
+	return nil, operationNotSupported
 }
 
 type String ast.String
@@ -60,6 +104,22 @@ func (o *String) Add(other Object) (Object, error) {
 	switch other := other.(type) {
 	case *String:
 		return &String{Value: o.Value + other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *String) Subscript(other Object) (Object, error) {
+	switch other := other.(type) {
+	case *Integer:
+		i := other.Value
+		l := int64(len(o.Value))
+		if i < 0 {
+			i = l + i
+		}
+		if i < 0 || i >= l {
+			return nil, fmt.Errorf("Index %d out of bounds", other.Value)
+		}
+		return &String{Value: string(o.Value[i])}, nil
 	}
 	return nil, operationNotSupported
 }

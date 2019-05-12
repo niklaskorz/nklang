@@ -36,6 +36,8 @@ func paramsToString(params []evaluator.Object) string {
 			}
 		case *evaluator.Nil:
 			s += "nil"
+		case *evaluator.Array:
+			s += "[" + paramsToString(p.Items) + "]"
 		case *evaluator.Function:
 			s += "func("
 			for j, param := range p.Function.Parameters {

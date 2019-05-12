@@ -86,3 +86,11 @@ type SubscriptExpression struct {
 func (n *SubscriptExpression) String() string {
 	return fmt.Sprintf("SubscriptExpression{Target: %s, Index: %s}", n.Target, n.Index)
 }
+
+type ArrayExpression struct {
+	Items []Expression
+}
+
+func (n *ArrayExpression) String() string {
+	return fmt.Sprintf("ArrayExpression{Items: %v}", n.Items)
+}

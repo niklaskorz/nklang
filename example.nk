@@ -99,8 +99,12 @@ pow := func(t) {
     println(src);
     return eval(src);
 };
-pow6 := pow(6);
-println("pow(6)(3):", pow6(3));
+println("pow(6)(3):", pow(6)(3));
+
+anArray := [1, 2, 3, 4];
+println("anArray:", anArray);
+println("anArray[2]:", anArray[2]);
+println("anArray[-1]:", anArray[-1]);
 
 name := input("What's your name? ");
 println("So your name is", name);

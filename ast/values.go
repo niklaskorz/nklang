@@ -15,10 +15,6 @@ func (n *Function) String() string {
 	return fmt.Sprintf("Function{Parameters: %s, Statements: %s}", n.Parameters, n.Statements)
 }
 
-func (n *Function) IsTrue() bool {
-	return true
-}
-
 type Integer struct {
 	Value int64
 }
@@ -27,20 +23,12 @@ func (n *Integer) String() string {
 	return fmt.Sprintf("Integer{Value: %d}", n.Value)
 }
 
-func (n *Integer) IsTrue() bool {
-	return n.Value != 0
-}
-
 type Float struct {
 	Value float64
 }
 
 func (n *Float) String() string {
 	return fmt.Sprintf("Float{Value: %f}", n.Value)
-}
-
-func (n *Float) IsTrue() bool {
-	return n.Value != 0.0
 }
 
 type String struct {

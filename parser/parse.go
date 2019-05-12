@@ -557,6 +557,8 @@ func parseValue(s *lexer.Scanner) (ast.Expression, error) {
 			return nil, err
 		}
 		return n, nil
+	case lexer.LeftBracket:
+		return parseArray(s)
 	case lexer.ID:
 		n := &ast.LookupExpression{Identifier: s.Token.Value}
 		if err := s.ReadNext(); err != nil {
@@ -662,9 +664,6 @@ func parseSubscript(target ast.Expression, s *lexer.Scanner) (ast.Expression, er
 	if err != nil {
 		return nil, err
 	}
-	if err := s.ReadNext(); err != nil {
-		return nil, err
-	}
 
 	if s.Token.Type != lexer.RightBracket {
 		return nil, unexpectedToken(s.Token, "]")
@@ -673,6 +672,42 @@ func parseSubscript(target ast.Expression, s *lexer.Scanner) (ast.Expression, er
 		return nil, err
 	}
 	return &ast.SubscriptExpression{Target: target, Index: index}, nil
+}
+
+func parseArray(s *lexer.Scanner) (ast.Expression, error) {
+	if s.Token.Type != lexer.LeftBracket {
+		return nil, unexpectedToken(s.Token, "[")
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	items := []ast.Expression{}
+
+	for {
+		e, err := parseExpression(s)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, e)
+
+		if s.Token.Type != lexer.Comma {
+			break
+		}
+		if err := s.ReadNext(); err != nil {
+			return nil, err
+		}
+	}
+
+	if s.Token.Type != lexer.RightBracket {
+		return nil, unexpectedToken(s.Token, "]")
+	}
+	if err := s.ReadNext(); err != nil {
+		return nil, err
+	}
+
+	return &ast.ArrayExpression{Items: items}, nil
 }
 
 // For reuse

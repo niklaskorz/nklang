@@ -16,6 +16,8 @@ func evaluateExpression(n ast.Expression, scope *DefinitionScope) (Object, error
 		return (*String)(e), nil
 	case *ast.Boolean:
 		return (*Boolean)(e), nil
+	case *ast.ArrayExpression:
+		return evaluateArrayExpression(e, scope)
 	case *ast.IfExpression:
 		return evaluateIfExpression(e, scope)
 	case *ast.BinaryOperationExpression:
@@ -26,9 +28,23 @@ func evaluateExpression(n ast.Expression, scope *DefinitionScope) (Object, error
 		return evaluateLookupExpression(e, scope)
 	case *ast.CallExpression:
 		return evaluateCallExpression(e, scope)
+	case *ast.SubscriptExpression:
+		return evaluateSubscriptExpression(e, scope)
 	}
 
 	return nil, nil
+}
+
+func evaluateArrayExpression(n *ast.ArrayExpression, scope *DefinitionScope) (Object, error) {
+	items := []Object{}
+	for _, e := range n.Items {
+		v, err := evaluateExpression(e, scope)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, v)
+	}
+	return &Array{Items: items}, nil
 }
 
 func evaluateIfExpression(n *ast.IfExpression, scope *DefinitionScope) (Object, error) {
@@ -194,6 +210,25 @@ func evaluatePredefinedFunctionCall(o *PredefinedFunction, params []ast.Expressi
 	}
 
 	return o.fn(parameters)
+}
+
+func evaluateSubscriptExpression(n *ast.SubscriptExpression, scope *DefinitionScope) (Object, error) {
+	target, err := evaluateExpression(n.Target, scope)
+	if err != nil {
+		return nil, err
+	}
+
+	o, ok := target.(Subscriptable)
+	if !ok {
+		return nil, operationNotSupported
+	}
+
+	index, err := evaluateExpression(n.Index, scope)
+	if err != nil {
+		return nil, err
+	}
+
+	return o.Subscript(index)
 }
 
 func EvaluateExpression(n ast.Expression, scope *DefinitionScope) (Object, error) {
