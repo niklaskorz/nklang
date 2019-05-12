@@ -304,7 +304,7 @@ func (o *Nil) Equals(other Object) (*Boolean, error) {
 
 type Function struct {
 	*ast.Function
-	parentScope *definitionScope
+	parentScope *DefinitionScope
 }
 
 func (o *Function) IsTrue() bool {

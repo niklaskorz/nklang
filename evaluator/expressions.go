@@ -4,7 +4,7 @@ import (
 	"github.com/niklaskorz/nklang/ast"
 )
 
-func evaluateExpression(n ast.Expression, scope *definitionScope) (Object, error) {
+func evaluateExpression(n ast.Expression, scope *DefinitionScope) (Object, error) {
 	switch e := n.(type) {
 	case *ast.Function:
 		return &Function{Function: e, parentScope: scope}, nil
@@ -31,7 +31,7 @@ func evaluateExpression(n ast.Expression, scope *definitionScope) (Object, error
 	return nil, nil
 }
 
-func evaluateIfExpression(n *ast.IfExpression, scope *definitionScope) (Object, error) {
+func evaluateIfExpression(n *ast.IfExpression, scope *DefinitionScope) (Object, error) {
 	if n.Condition == nil {
 		return evaluateExpression(n.Value, scope)
 	}
@@ -47,7 +47,7 @@ func evaluateIfExpression(n *ast.IfExpression, scope *definitionScope) (Object, 
 	return evaluateIfExpression(n.ElseBranch, scope)
 }
 
-func evaluateBinaryExpression(n *ast.BinaryOperationExpression, scope *definitionScope) (Object, error) {
+func evaluateBinaryExpression(n *ast.BinaryOperationExpression, scope *DefinitionScope) (Object, error) {
 	aValue, err := evaluateExpression(n.A, scope)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func evaluateBinaryExpression(n *ast.BinaryOperationExpression, scope *definitio
 	return nil, operationNotSupported
 }
 
-func evaluateUnaryExpression(n *ast.UnaryOperationExpression, scope *definitionScope) (Object, error) {
+func evaluateUnaryExpression(n *ast.UnaryOperationExpression, scope *DefinitionScope) (Object, error) {
 	value, err := evaluateExpression(n.A, scope)
 	if err != nil {
 		return nil, err
@@ -136,11 +136,11 @@ func evaluateUnaryExpression(n *ast.UnaryOperationExpression, scope *definitionS
 	return nil, operationNotSupported
 }
 
-func evaluateLookupExpression(n *ast.LookupExpression, scope *definitionScope) (Object, error) {
+func evaluateLookupExpression(n *ast.LookupExpression, scope *DefinitionScope) (Object, error) {
 	return scope.lookup(n.Identifier, n.ScopeIndex), nil
 }
 
-func evaluateCallExpression(n *ast.CallExpression, scope *definitionScope) (Object, error) {
+func evaluateCallExpression(n *ast.CallExpression, scope *DefinitionScope) (Object, error) {
 	callee, err := evaluateExpression(n.Callee, scope)
 	if err != nil {
 		return nil, err
@@ -156,7 +156,7 @@ func evaluateCallExpression(n *ast.CallExpression, scope *definitionScope) (Obje
 	return nil, OperationNotSupportedError{}
 }
 
-func evaluateFunctionCall(o *Function, params []ast.Expression, scope *definitionScope) (Object, error) {
+func evaluateFunctionCall(o *Function, params []ast.Expression, scope *DefinitionScope) (Object, error) {
 	parameterScope := o.parentScope.newScope()
 	for i, p := range params {
 		v, err := evaluateExpression(p, scope)
@@ -183,7 +183,7 @@ func evaluateFunctionCall(o *Function, params []ast.Expression, scope *definitio
 	return NilObject, nil
 }
 
-func evaluatePredefinedFunctionCall(o *PredefinedFunction, params []ast.Expression, scope *definitionScope) (Object, error) {
+func evaluatePredefinedFunctionCall(o *PredefinedFunction, params []ast.Expression, scope *DefinitionScope) (Object, error) {
 	parameters := []Object{}
 	for _, p := range params {
 		v, err := evaluateExpression(p, scope)
@@ -196,6 +196,6 @@ func evaluatePredefinedFunctionCall(o *PredefinedFunction, params []ast.Expressi
 	return o.fn(parameters)
 }
 
-func EvaluateExpression(n ast.Expression, scope *definitionScope) (Object, error) {
+func EvaluateExpression(n ast.Expression, scope *DefinitionScope) (Object, error) {
 	return evaluateExpression(n, scope)
 }

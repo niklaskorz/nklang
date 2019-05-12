@@ -11,23 +11,23 @@ func (s definitionSet) has(name string) bool {
 	return ok
 }
 
-type definitionScope struct {
-	parent      *definitionScope
+type DefinitionScope struct {
+	parent      *DefinitionScope
 	definitions definitionSet
 }
 
-func NewScope() *definitionScope {
-	return &definitionScope{definitions: make(definitionSet)}
+func NewScope() *DefinitionScope {
+	return &DefinitionScope{definitions: make(definitionSet)}
 }
 
-func (scope *definitionScope) newScope() *definitionScope {
-	return &definitionScope{
+func (scope *DefinitionScope) newScope() *DefinitionScope {
+	return &DefinitionScope{
 		parent:      scope,
 		definitions: make(definitionSet),
 	}
 }
 
-func (scope *definitionScope) lookup(name string, index int) int {
+func (scope *DefinitionScope) lookup(name string, index int) int {
 	if scope.definitions.has(name) {
 		return index
 	}
@@ -37,10 +37,10 @@ func (scope *definitionScope) lookup(name string, index int) int {
 	return scope.parent.lookup(name, index+1)
 }
 
-func (scope *definitionScope) declare(name string) {
+func (scope *DefinitionScope) declare(name string) {
 	scope.definitions.set(name)
 }
 
-func (scope *definitionScope) Declare(name string) {
+func (scope *DefinitionScope) Declare(name string) {
 	scope.definitions.set(name)
 }

@@ -7,11 +7,11 @@ import (
 )
 
 func AnalyzeLookups(p *ast.Program) error {
-	globalScope := &definitionScope{definitions: make(definitionSet)}
+	globalScope := &DefinitionScope{definitions: make(definitionSet)}
 	return AnalyzeLookupsWithScope(p, globalScope)
 }
 
-func AnalyzeLookupsWithScope(p *ast.Program, scope *definitionScope) error {
+func AnalyzeLookupsWithScope(p *ast.Program, scope *DefinitionScope) error {
 	for _, n := range p.Statements {
 		if err := analyzeStatement(scope, n); err != nil {
 			return err
@@ -21,7 +21,7 @@ func AnalyzeLookupsWithScope(p *ast.Program, scope *definitionScope) error {
 	return nil
 }
 
-func analyzeStatement(scope *definitionScope, n ast.Statement) error {
+func analyzeStatement(scope *DefinitionScope, n ast.Statement) error {
 	switch s := n.(type) {
 	case *ast.IfStatement:
 		if s.Condition != nil {
@@ -80,7 +80,7 @@ func analyzeStatement(scope *definitionScope, n ast.Statement) error {
 	return nil
 }
 
-func analyzeExpression(scope *definitionScope, n ast.Expression) error {
+func analyzeExpression(scope *DefinitionScope, n ast.Expression) error {
 	switch e := n.(type) {
 	case *ast.IfExpression:
 		if e.Condition != nil {
@@ -134,6 +134,6 @@ func analyzeExpression(scope *definitionScope, n ast.Expression) error {
 	return nil
 }
 
-func AnalyzeExpression(scope *definitionScope, n ast.Expression) error {
+func AnalyzeExpression(scope *DefinitionScope, n ast.Expression) error {
 	return analyzeExpression(scope, n)
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/niklaskorz/nklang/ast"
 )
 
-func evaluateStatements(statements []ast.Statement, scope *definitionScope) error {
+func evaluateStatements(statements []ast.Statement, scope *DefinitionScope) error {
 	for _, s := range statements {
 		if err := evaluateStatement(s, scope); err != nil {
 			return err
@@ -13,7 +13,7 @@ func evaluateStatements(statements []ast.Statement, scope *definitionScope) erro
 	return nil
 }
 
-func evaluateStatement(n ast.Statement, scope *definitionScope) error {
+func evaluateStatement(n ast.Statement, scope *DefinitionScope) error {
 	switch s := n.(type) {
 	case *ast.IfStatement:
 		return evaluateIfStatement(s, scope)
@@ -35,7 +35,7 @@ func evaluateStatement(n ast.Statement, scope *definitionScope) error {
 	return nil
 }
 
-func evaluateIfStatement(n *ast.IfStatement, scope *definitionScope) error {
+func evaluateIfStatement(n *ast.IfStatement, scope *DefinitionScope) error {
 	if n.Condition == nil {
 		return evaluateStatements(n.Statements, scope.newScope())
 	}
@@ -53,7 +53,7 @@ func evaluateIfStatement(n *ast.IfStatement, scope *definitionScope) error {
 	return nil
 }
 
-func evaluateWhileStatement(n *ast.WhileStatement, scope *definitionScope) error {
+func evaluateWhileStatement(n *ast.WhileStatement, scope *DefinitionScope) error {
 	for {
 		c, err := evaluateExpression(n.Condition, scope)
 		if err != nil {
@@ -76,12 +76,12 @@ func evaluateWhileStatement(n *ast.WhileStatement, scope *definitionScope) error
 	}
 }
 
-func evaluateExpressionStatement(n *ast.ExpressionStatement, scope *definitionScope) error {
+func evaluateExpressionStatement(n *ast.ExpressionStatement, scope *DefinitionScope) error {
 	_, err := evaluateExpression(n.Expression, scope)
 	return err
 }
 
-func evaluateDeclarationStatement(n *ast.DeclarationStatement, scope *definitionScope) error {
+func evaluateDeclarationStatement(n *ast.DeclarationStatement, scope *DefinitionScope) error {
 	value, err := evaluateExpression(n.Value, scope)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func evaluateDeclarationStatement(n *ast.DeclarationStatement, scope *definition
 	return nil
 }
 
-func evaluateAssignmentStatement(n *ast.AssignmentStatement, scope *definitionScope) error {
+func evaluateAssignmentStatement(n *ast.AssignmentStatement, scope *DefinitionScope) error {
 	value, err := evaluateExpression(n.Value, scope)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func evaluateAssignmentStatement(n *ast.AssignmentStatement, scope *definitionSc
 	return nil
 }
 
-func evaluateReturnStatement(n *ast.ReturnStatement, scope *definitionScope) error {
+func evaluateReturnStatement(n *ast.ReturnStatement, scope *DefinitionScope) error {
 	value, err := evaluateExpression(n.Expression, scope)
 	if err != nil {
 		return err
@@ -107,10 +107,10 @@ func evaluateReturnStatement(n *ast.ReturnStatement, scope *definitionScope) err
 	return &returnError{value: value}
 }
 
-func evaluateContinueStatement(n *ast.ContinueStatement, scope *definitionScope) error {
+func evaluateContinueStatement(n *ast.ContinueStatement, scope *DefinitionScope) error {
 	return &continueError{}
 }
 
-func evaluateBreakStatement(n *ast.BreakStatement, scope *definitionScope) error {
+func evaluateBreakStatement(n *ast.BreakStatement, scope *DefinitionScope) error {
 	return &breakError{}
 }

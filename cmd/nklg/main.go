@@ -103,34 +103,70 @@ func pfEval(params []evaluator.Object) (evaluator.Object, error) {
 	return result, nil
 }
 
-func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage:", os.Args[0], "<source file>")
-		return
+func runString(src string, ds *semantics.DefinitionScope, scope *evaluator.DefinitionScope) error {
+	s := lexer.NewScanner(strings.NewReader(src))
+	p, err := parser.Parse(s)
+	if err != nil {
+		return err
 	}
 
+	if err := semantics.AnalyzeLookupsWithScope(p, ds); err != nil {
+		return err
+	}
+
+	if err := evaluator.EvaluateWithScope(p, scope); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runRepl(ds *semantics.DefinitionScope, scope *evaluator.DefinitionScope) error {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("-- nklang repl --")
+	for {
+		fmt.Print("> ")
+		text, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+
+		src := text[:len(text)-1]
+		if err := runString(src, ds, scope); err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+func runFile(path string, ds *semantics.DefinitionScope, scope *evaluator.DefinitionScope) error {
 	f, err := os.Open(os.Args[1])
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	s := lexer.NewScanner(f)
 	p, err := parser.Parse(s)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
+	if err := semantics.AnalyzeLookupsWithScope(p, ds); err != nil {
+		return err
+	}
+
+	if err := evaluator.EvaluateWithScope(p, scope); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func main() {
 	ds := semantics.NewScope()
 	ds.Declare("println")
 	ds.Declare("print")
 	ds.Declare("input")
 	ds.Declare("eval")
-	if err := semantics.AnalyzeLookupsWithScope(p, ds); err != nil {
-		fmt.Println(err)
-		return
-	}
 
 	pfPrintln := evaluator.WrapFunction(pfPrintln)
 	pfPrint := evaluator.WrapFunction(pfPrint)
@@ -142,8 +178,16 @@ func main() {
 	scope.Declare("input", pfInput)
 	scope.Declare("eval", pfEval)
 
-	if err := evaluator.EvaluateWithScope(p, scope); err != nil {
+	var err error
+	if len(os.Args) < 2 {
+		// REPL mode
+		err = runRepl(ds, scope)
+	} else {
+		// File mode
+		err = runFile(os.Args[1], ds, scope)
+	}
+
+	if err != nil {
 		fmt.Println(err)
-		return
 	}
 }
