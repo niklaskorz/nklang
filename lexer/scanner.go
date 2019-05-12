@@ -172,7 +172,33 @@ func (s *Scanner) readNext() error {
 			return err
 		}
 		num := string(r) + v
-		s.Token = &Token{Line: line, Column: column, Type: Integer, Value: num}
+		r, err = s.readRune()
+		if err != nil {
+			return err
+		}
+		if r == '.' {
+			// Floating point number
+			r, err = s.readRune()
+			if err != nil {
+				return err
+			}
+			if !unicode.IsDigit(r) {
+				return s.unexpectedSymbol(r)
+			}
+			v, err = s.scanIdentifier()
+			if err != nil {
+				return err
+			}
+			num += "." + string(r) + v
+			s.Token = &Token{Line: line, Column: column, Type: Float, Value: num}
+			
+		} else {
+			// Integer
+			if err := s.unreadRune(); err != nil {
+				return err
+			}
+			s.Token = &Token{Line: line, Column: column, Type: Integer, Value: num}
+		}
 		return nil
 	}
 

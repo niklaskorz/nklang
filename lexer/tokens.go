@@ -39,8 +39,8 @@ const (
 	RightBracket                  // ]
 	ID                            // Unicode letter followed by unicode letters or digits
 	Integer                       // Digits
-	Float
-	String // Arbitrary characters enclosed by quotation marks
+	Float                         // Real numbers
+	String                        // Arbitrary characters enclosed by quotation marks
 )
 
 type Token struct {
