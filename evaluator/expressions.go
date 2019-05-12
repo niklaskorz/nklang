@@ -10,6 +10,8 @@ func evaluateExpression(n ast.Expression, scope *definitionScope) (Object, error
 		return &Function{Function: e, parentScope: scope}, nil
 	case *ast.Integer:
 		return (*Integer)(e), nil
+	case *ast.Float:
+		return (*Float)(e), nil
 	case *ast.String:
 		return (*String)(e), nil
 	case *ast.Boolean:

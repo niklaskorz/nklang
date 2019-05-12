@@ -26,6 +26,8 @@ func paramsToString(params []evaluator.Object) string {
 			s += p.Value
 		case *evaluator.Integer:
 			s += strconv.FormatInt(p.Value, 10)
+		case *evaluator.Float:
+			s += strconv.FormatFloat(p.Value, 'f', -1, 64)
 		case *evaluator.Boolean:
 			if p.Value {
 				s += "true"

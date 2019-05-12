@@ -53,7 +53,7 @@ func (o *String) Equals(other Object) (*Boolean, error) {
 	case *String:
 		return &Boolean{Value: o.Value == other.Value}, nil
 	}
-	return nil, operationNotSupported
+	return &Boolean{Value: false}, nil
 }
 
 func (o *String) Add(other Object) (Object, error) {
@@ -74,14 +74,18 @@ func (o *Integer) Equals(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value == other.Value}, nil
+	case *Float:
+		return &Boolean{Value: float64(o.Value) == other.Value}, nil
 	}
-	return nil, operationNotSupported
+	return &Boolean{Value: false}, nil
 }
 
 func (o *Integer) Lt(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value < other.Value}, nil
+	case *Float:
+		return &Boolean{Value: float64(o.Value) < other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -90,6 +94,8 @@ func (o *Integer) Lte(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value <= other.Value}, nil
+	case *Float:
+		return &Boolean{Value: float64(o.Value) <= other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -98,6 +104,8 @@ func (o *Integer) Gt(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value > other.Value}, nil
+	case *Float:
+		return &Boolean{Value: float64(o.Value) > other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -106,6 +114,8 @@ func (o *Integer) Gte(other Object) (*Boolean, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Boolean{Value: o.Value >= other.Value}, nil
+	case *Float:
+		return &Boolean{Value: float64(o.Value) >= other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -114,6 +124,8 @@ func (o *Integer) Add(other Object) (Object, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Integer{Value: o.Value + other.Value}, nil
+	case *Float:
+		return &Float{Value: float64(o.Value) + other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -122,6 +134,8 @@ func (o *Integer) Sub(other Object) (Object, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Integer{Value: o.Value - other.Value}, nil
+	case *Float:
+		return &Float{Value: float64(o.Value) - other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -130,6 +144,8 @@ func (o *Integer) Mul(other Object) (Object, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Integer{Value: o.Value * other.Value}, nil
+	case *Float:
+		return &Float{Value: float64(o.Value) * other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -138,6 +154,8 @@ func (o *Integer) Div(other Object) (Object, error) {
 	switch other := other.(type) {
 	case *Integer:
 		return &Integer{Value: o.Value / other.Value}, nil
+	case *Float:
+		return &Float{Value: float64(o.Value) / other.Value}, nil
 	}
 	return nil, operationNotSupported
 }
@@ -148,6 +166,110 @@ func (o *Integer) Pos() (Object, error) {
 
 func (o *Integer) Neg() (Object, error) {
 	return &Integer{Value: -o.Value}, nil
+}
+
+type Float ast.Float
+
+func (o *Float) IsTrue() bool {
+	return o.Value != 0
+}
+
+func (o *Float) Equals(other Object) (*Boolean, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Boolean{Value: o.Value == float64(other.Value)}, nil
+	case *Float:
+		return &Boolean{Value: o.Value == other.Value}, nil
+	}
+	return &Boolean{Value: false}, nil
+}
+
+func (o *Float) Lt(other Object) (*Boolean, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Boolean{Value: o.Value < float64(other.Value)}, nil
+	case *Float:
+		return &Boolean{Value: o.Value < other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Lte(other Object) (*Boolean, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Boolean{Value: o.Value <= float64(other.Value)}, nil
+	case *Float:
+		return &Boolean{Value: o.Value <= other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Gt(other Object) (*Boolean, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Boolean{Value: o.Value > float64(other.Value)}, nil
+	case *Float:
+		return &Boolean{Value: o.Value > other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Gte(other Object) (*Boolean, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Boolean{Value: o.Value >= float64(other.Value)}, nil
+	case *Float:
+		return &Boolean{Value: o.Value >= other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Add(other Object) (Object, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Float{Value: o.Value + float64(other.Value)}, nil
+	case *Float:
+		return &Float{Value: o.Value + other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Sub(other Object) (Object, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Float{Value: o.Value - float64(other.Value)}, nil
+	case *Float:
+		return &Float{Value: o.Value - other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Mul(other Object) (Object, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Float{Value: o.Value * float64(other.Value)}, nil
+	case *Float:
+		return &Float{Value: o.Value * other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Div(other Object) (Object, error) {
+	switch other := other.(type) {
+	case *Integer:
+		return &Float{Value: o.Value / float64(other.Value)}, nil
+	case *Float:
+		return &Float{Value: o.Value / other.Value}, nil
+	}
+	return nil, operationNotSupported
+}
+
+func (o *Float) Pos() (Object, error) {
+	return o, nil
+}
+
+func (o *Float) Neg() (Object, error) {
+	return &Float{Value: -o.Value}, nil
 }
 
 type Boolean ast.Boolean
@@ -161,7 +283,7 @@ func (o *Boolean) Equals(other Object) (*Boolean, error) {
 	case *Boolean:
 		return &Boolean{Value: o.Value == other.Value}, nil
 	}
-	return nil, operationNotSupported
+	return &Boolean{Value: false}, nil
 }
 
 type Nil ast.Nil
